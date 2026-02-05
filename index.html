@@ -1,108 +1,37 @@
-<script>
-// ================= INTUICIÓN IA =================
-const estados = ["FAVORABLE", "NEUTRO", "DESFAVORABLE"];
-const contexto = estados[Math.floor(Math.random() * estados.length)];
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>IA Intuición XAUUSD</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-let sugerencia = "Esperar";
-let duracion = "—";
-let confianzaTxt = "—";
-
-if (contexto === "FAVORABLE") {
-  sugerencia = "🟢 Posible COMPRA";
-  duracion = "5–15 min";
-  confianzaTxt = "70%";
-} else if (contexto === "DESFAVORABLE") {
-  sugerencia = "🔴 Posible VENTA";
-  duracion = "5–15 min";
-  confianzaTxt = "70%";
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0f1220;
+  color: #ffffff;
+  text-align: center;
 }
 
-document.getElementById("contexto").innerText = contexto;
-document.getElementById("sugerencia").innerText = sugerencia;
-document.getElementById("duracion").innerText = duracion;
-document.getElementById("confianza").innerText = confianzaTxt;
-document.getElementById("senalGrafica").innerText = sugerencia;
-
-// ================= VARIABLES IA =================
-let volume = 1;
-let pip = 0.01;
-let leverage = 400;
-
-const baseCapital = 100;
-const minVolume = 1;
-const maxVolume = 10;
-const minPip = 0.01;
-const maxPip = 0.10;
-
-// ================= CONTROLES =================
-function changeVolume(step) {
-  volume = Math.min(maxVolume, Math.max(minVolume, volume + step));
-  updateIA();
+header {
+  padding: 30px 15px;
 }
 
-function changePip(step) {
-  pip = parseFloat((pip + step).toFixed(2));
-  pip = Math.min(maxPip, Math.max(minPip, pip));
-  updateIA();
+.panel {
+  background: #161a2f;
+  border-radius: 12px;
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 20px;
 }
 
-function updateLeverage(val) {
-  leverage = Number(val);
-  updateIA();
+h1, h2 {
+  margin-top: 0;
 }
 
-// ================= CÁLCULOS IA =================
-function exposureUSD() {
-  return baseCapital * volume * leverage;
-}
-
-function profitUSD() {
-  const pipValuePer100k = 10; // aproximación XAUUSD
-  return pip * pipValuePer100k * (exposureUSD() / 100000);
-}
-
-function volatility() {
-  return 0.005 + volume * 0.0005;
-}
-
-function timeToClose() {
-  return Math.max(1, Math.ceil(pip / volatility()));
-}
-
-function structure() {
-  if (pip <= 0.02) return "Scalp";
-  if (pip <= 0.05) return "Impulso";
-  return "Estructural";
-}
-
-function confidenceIA() {
-  let score = 70;
-  if (pip <= 0.02) score += 10;
-  if (volume <= 5) score += 5;
-  if (leverage >= 400) score -= 5;
-  return Math.min(score, 90);
-}
-
-// ================= ACTUALIZAR UI =================
-function updateIA() {
-  const pipEl = document.getElementById("pipValue");
-  const volEl = document.getElementById("volumeValue");
-  const usdEl = document.getElementById("gananciaUsd");
-  const timeEl = document.getElementById("tiempoCierre");
-  const structEl = document.getElementById("estructura");
-  const confEl = document.getElementById("confianzaIA");
-
-  if (pipEl) pipEl.innerText = pip.toFixed(2);
-  if (volEl) volEl.innerText = volume;
-  if (usdEl) usdEl.innerText = `$${profitUSD().toFixed(2)}`;
-  if (timeEl) timeEl.innerText = `${timeToClose()} min`;
-  if (structEl) structEl.innerText = structure();
-  if (confEl) confEl.innerText = `${confidenceIA()}%`;
-}
-
-// ================= TRADE =================
-let tradeActivo = false;
-
-function iniciarTrade(tipo) {
-  tradeActivo = true;
-  document.getElementBy
+button {
+  padding: 10px 16px;
+  margin: 5px;
+  border: none;
+  border-radius: 6px;
