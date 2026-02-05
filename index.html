@@ -1,198 +1,65 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>IA Intuición XAUUSD</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>IA Intuición XAUUSD</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #0f1220;
-      color: #ffffff;
-      text-align: center;
-    }
-    header {
-      padding: 40px 20px;
-    }
-    h1 {
-      margin-bottom: 10px;
-    }
-    p {
-      max-width: 800px;
-      margin: 0 auto 20px;
-      line-height: 1.6;
-      color: #cfcfcf;
-    }
-    section {
-      padding: 40px 20px;
-    }
-    .panel {
-      background: #161a2f;
-      border-radius: 12px;
-      max-width: 900px;
-      margin: 20px auto;
-      padding: 20px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.4);
-    }
-    button {
-      padding: 10px 16px;
-      margin: 5px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-    .buy { background:#2e7d32; color:#fff; }
-    .sell { background:#c62828; color:#fff; }
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0f1220;
+  color: #ffffff;
+  text-align: center;
+}
+header { padding: 40px 20px; }
+section { padding: 20px; }
 
-    .semaforo {
-      font-size: 28px;
-    }
-    footer {
-      font-size: 12px;
-      color: #999;
-      padding: 30px 20px;
-    }
-  </style>
+.panel {
+  background: #161a2f;
+  border-radius: 12px;
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 20px;
+}
+
+button {
+  padding: 10px 16px;
+  margin: 5px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.buy { background:#2e7d32; color:#fff; }
+.sell { background:#c62828; color:#fff; }
+.close { background:#444; color:#fff; }
+
+#chartContainer {
+  position: relative;
+  max-width: 100%;
+}
+
+#fullscreenBtn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+  background: #000;
+  color: #fff;
+  font-size: 18px;
+  border-radius: 6px;
+}
+
+.signalBox {
+  font-size: 20px;
+  margin-top: 10px;
+}
+</style>
 </head>
 
 <body>
 
 <header>
-  <h1>🤖 IA de Intuición para XAUUSD</h1>
-  <p>
-    Copiloto inteligente para scalping en oro.
-    Tú decides la entrada, la IA te ayuda a maximizar la salida.
-  </p>
-</header>
-
-<!-- GRÁFICO -->
-<section>
-  <div class="tradingview-widget-container">
-    <div id="tradingview_xauusd"></div>
-    <script src="https://s3.tradingview.com/tv.js"></script>
-    <script>
-      new TradingView.widget({
-        "width": "100%",
-        "height": 480,
-        "symbol": "OANDA:XAUUSD",
-        "interval": "1",
-        "timezone": "Etc/UTC",
-        "theme": "dark",
-        "style": "1",
-        "locale": "es",
-        "toolbar_bg": "#0f1220",
-        "enable_publishing": false,
-        "hide_side_toolbar": false,
-        "container_id": "tradingview_xauusd"
-      });
-    </script>
-  </div>
-</section>
-
-<!-- CUADRO 1 -->
-<section class="panel">
-  <h2>📊 Intuición IA (antes de operar)</h2>
-
-  <p><strong>Contexto actual:</strong> <span id="contexto"></span></p>
-  <p><strong>Sugerencia:</strong> <span id="direccion"></span></p>
-  <p><strong>Duración estimada:</strong> <span id="duracion"></span></p>
-  <p><strong>Confianza:</strong> <span id="confianza"></span></p>
-</section>
-
-<!-- CUADRO 2 -->
-<section class="panel">
-  <h2>🧠 Seguimiento IA (trade activo)</h2>
-
-  <button class="buy" onclick="iniciarOperacion('compra')">🟢 Inicié COMPRA</button>
-  <button class="sell" onclick="iniciarOperacion('venta')">🔴 Inicié VENTA</button>
-
-  <p><strong>Dirección:</strong> <span id="flecha">➡️</span></p>
-  <p><strong>Ganancia estimada:</strong> <span id="ganancia">0%</span></p>
-  <p><strong>Semáforo:</strong> <span class="semaforo" id="semaforo">🟡</span></p>
-
-  <p id="mensaje"></p>
-</section>
-
-<footer>
-  <p>
-    Aviso: Esta web es educativa. No constituye asesoramiento financiero.
-  </p>
-</footer>
-
-<script>
-  // ================= INTUICIÓN IA =================
-  const contextos = ["FAVORABLE", "NEUTRO", "DESFAVORABLE"];
-  const contexto = contextos[Math.floor(Math.random()*3)];
-
-  let direccion = "⏸ Esperar";
-  let duracion = "—";
-  let confianza = "—";
-
-  if (contexto === "FAVORABLE") {
-    direccion = "📈 Posible COMPRA";
-    duracion = "5–15 min";
-    confianza = "65–75%";
-  } else if (contexto === "DESFAVORABLE") {
-    direccion = "📉 Posible VENTA";
-    duracion = "5–15 min";
-    confianza = "65–75%";
-  } else {
-    duracion = "No recomendado";
-    confianza = "—";
-  }
-
-  document.getElementById("contexto").innerText = contexto;
-  document.getElementById("direccion").innerText = direccion;
-  document.getElementById("duracion").innerText = duracion;
-  document.getElementById("confianza").innerText = confianza;
-
-  // ================= SEGUIMIENTO =================
-  let operacionActiva = false;
-  let tipoOperacion = null;
-
-  function iniciarOperacion(tipo) {
-    operacionActiva = true;
-    tipoOperacion = tipo;
-    document.getElementById("mensaje").innerText =
-      `Seguimiento activo de ${tipo.toUpperCase()}. IA optimizando salida...`;
-  }
-
-  setInterval(() => {
-    if (!operacionActiva) return;
-
-    const momentum = Math.random();
-    let flecha = "➡️";
-    let semaforo = "🟡";
-    let ganancia = "0%";
-    let mensaje = "";
-
-    if (momentum > 0.7) {
-      flecha = tipoOperacion === "compra" ? "⬆️" : "⬇️";
-      semaforo = "🟢";
-      ganancia = `+${(momentum*0.9).toFixed(2)}%`;
-      mensaje = "Momentum fuerte. Mantener.";
-    } else if (momentum > 0.4) {
-      flecha = "➡️";
-      semaforo = "🟡";
-      ganancia = `+${(momentum*0.5).toFixed(2)}%`;
-      mensaje = "Atención: posible agotamiento.";
-    } else {
-      flecha = tipoOperacion === "compra" ? "⬇️" : "⬆️";
-      semaforo = "🔴";
-      ganancia = `+${(momentum*0.3).toFixed(2)}%`;
-      mensaje = "Cerrar recomendado para proteger ganancia.";
-    }
-
-    document.getElementById("flecha").innerText = flecha;
-    document.getElementById("semaforo").innerText = semaforo;
-    document.getElementById("ganancia").innerText = ganancia;
-    document.getElementById("mensaje").innerText = mensaje;
-
-  }, 4000);
-</script>
-
-</body>
-</html>
+<h1>🤖 IA de Intuición XAUUSD</h1>
+<p>Copiloto inteligente para scalping en
