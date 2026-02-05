@@ -7,230 +7,66 @@
 
 <style>
 body {
-  margin:0;
-  font-family:Arial, sans-serif;
-  background:#0f1220;
-  color:#ffffff;
-  text-align:center;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0f1220;
+  color: #fff;
+  text-align: center;
 }
-header {
-  padding:30px 20px;
-}
+
+header { padding: 30px 15px; }
+
 .panel {
-  background:#161a2f;
-  border-radius:12px;
-  max-width:900px;
-  margin:20px auto;
-  padding:20px;
+  background: #161a2f;
+  border-radius: 12px;
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 20px;
 }
+
 button {
-  padding:10px 16px;
-  margin:5px;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
-}
-.buy { background:#2e7d32; color:#fff; }
-.sell { background:#c62828; color:#fff; }
-.close { background:#444; color:#fff; }
-
-.control {
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:10px;
-  margin:12px 0;
+  padding: 10px 16px;
+  margin: 5px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
 }
 
-.control button {
-  width:36px;
-  height:36px;
-  font-size:18px;
-}
+.buy { background:#2ecc71; }
+.sell { background:#e74c3c; }
+.close { background:#555; color:#fff; }
 
-select {
-  padding:8px;
-  border-radius:6px;
-  border:none;
+input {
+  padding: 8px;
+  margin: 5px;
+  width: 140px;
+  border-radius: 6px;
+  border: none;
+  text-align: center;
 }
 
 .signalOverlay {
-  margin-top:10px;
-  font-size:18px;
-  font-weight:bold;
-}
-footer {
-  font-size:12px;
-  color:#aaa;
-  padding:30px;
-}
-</style>
-</head>
-
-<body>
-
-<header>
-<h1>🤖 IA Intuición XAUUSD</h1>
-<p>Copiloto inteligente para scalping en oro</p>
-</header>
-
-<!-- GRÁFICA -->
-<section class="panel">
-<h2>📈 Gráfica XAUUSD</h2>
-
-<div style="width:100%;height:500px;border-radius:12px;overflow:hidden;">
-  <iframe
-    src="https://www.tradingview.com/widgetembed/?symbol=OANDA:XAUUSD&interval=1&theme=dark&style=1&locale=es"
-    style="width:100%;height:100%;border:none;">
-  </iframe>
-</div>
-
-<div class="signalOverlay" id="senalGrafica">
-🟡 IA esperando confirmación del mercado
-</div>
-</section>
-
-<!-- INTUICIÓN IA -->
-<section class="panel">
-<h2>📊 Intuición IA</h2>
-
-<p><strong>Contexto:</strong> <span id="iaContexto">—</span></p>
-<p><strong>Sugerencia:</strong> <span id="iaSugerencia">—</span></p>
-<p><strong>Duración estimada:</strong> <span id="iaDuracion">—</span></p>
-<p><strong>Confianza:</strong> <span id="iaConfianza">—</span></p>
-</section>
-
-<!-- CONFIGURACIÓN -->
-<section class="panel">
-<h2>⚙️ Configuración del Trade</h2>
-
-<div class="control">
-  <span>Pip objetivo</span>
-  <button onclick="pip -= 0.01; actualizar()">−</button>
-  <strong id="pipVal">0.01</strong>
-  <button onclick="pip += 0.01; actualizar()">+</button>
-</div>
-
-<div class="control">
-  <span>Volumen</span>
-  <button onclick="volumen--; actualizar()">−</button>
-  <strong id="volVal">1</strong>
-  <button onclick="volumen++; actualizar()">+</button>
-</div>
-
-<div class="control">
-  <span>Apalancamiento</span>
-  <select id="apal" onchange="actualizar()">
-    <option value="2">1:2</option>
-    <option value="20">1:20</option>
-    <option value="50">1:50</option>
-    <option value="100">1:100</option>
-    <option value="200">1:200</option>
-    <option value="400" selected>1:400</option>
-    <option value="500">1:500</option>
-    <option value="800">1:800</option>
-    <option value="1000">1:1000</option>
-    <option value="2000">1:2000</option>
-  </select>
-</div>
-
-<p><strong>Ganancia estimada:</strong> <span id="usd">$0.00</span></p>
-<p><strong>Tiempo estimado de cierre:</strong> <span id="tiempo">—</span></p>
-</section>
-
-<!-- CONTROL -->
-<section class="panel">
-<h2>🧠 Seguimiento IA</h2>
-
-<button class="buy" onclick="trade('COMPRA')">🟢 COMPRA</button>
-<button class="sell" onclick="trade('VENTA')">🔴 VENTA</button>
-<button class="close" onclick="cerrar()">⏹ Finalizar</button>
-
-<p id="msg"></p>
-</section>
-
-<footer>
-Aviso: Esta web es educativa. No constituye asesoramiento financiero.
-</footer>
-
-<script>
-/* ================= IA ================= */
-const estados = ["FAVORABLE","NEUTRO","DESFAVORABLE"];
-let contextoIA = estados[Math.floor(Math.random()*3)];
-
-/* ================= VARIABLES ================= */
-let pip = 0.01;
-let volumen = 1;
-
-/* ================= FUNCIONES ================= */
-function actualizarIA(tipo = null) {
-  let sugerencia = "Esperar";
-  let duracion = "—";
-  let confianza = "—";
-
-  if (contextoIA === "FAVORABLE") {
-    sugerencia = "🟢 Buscar COMPRA";
-    duracion = "5–10 min";
-    confianza = "70%";
-  }
-  if (contextoIA === "DESFAVORABLE") {
-    sugerencia = "🔴 Buscar VENTA";
-    duracion = "5–15 min";
-    confianza = "70%";
-  }
-
-  if (tipo) {
-    sugerencia = tipo === "COMPRA"
-      ? "🟢 IA acompañando COMPRA"
-      : "🔴 IA acompañando VENTA";
-    confianza = "80%";
-  }
-
-  document.getElementById("iaContexto").innerText = contextoIA;
-  document.getElementById("iaSugerencia").innerText = sugerencia;
-  document.getElementById("iaDuracion").innerText = duracion;
-  document.getElementById("iaConfianza").innerText = confianza;
+  margin-top: 10px;
+  font-size: 20px;
+  font-weight: bold;
 }
 
-function actualizar() {
-  if (pip < 0.01) pip = 0.01;
-  if (volumen < 1) volumen = 1;
-
-  document.getElementById("pipVal").innerText = pip.toFixed(2);
-  document.getElementById("volVal").innerText = volumen;
-
-  const apal = Number(document.getElementById("apal").value);
-  const usd = pip * volumen * apal * 10;
-
-  document.getElementById("usd").innerText = `$${usd.toFixed(2)}`;
-
-  document.getElementById("tiempo").innerText =
-    pip <= 0.03 ? "2–5 min" :
-    pip <= 0.06 ? "5–10 min" :
-    "10–20 min";
+/* ===== PANEL LED ===== */
+#panelLed {
+  background: #000;
+  font-size: 32px;
+  font-weight: bold;
+  letter-spacing: 3px;
+  padding: 15px;
+  margin: 20px auto;
+  max-width: 900px;
+  border-radius: 10px;
+  text-transform: uppercase;
 }
 
-function trade(tipo) {
-  actualizarIA(tipo);
-  document.getElementById("senalGrafica").innerText =
-    tipo === "COMPRA"
-      ? "🟢 IA acompaña COMPRA"
-      : "🔴 IA acompaña VENTA";
-  document.getElementById("msg").innerText =
-    `Trade ${tipo} activo. IA calcula salida óptima.`;
-}
-
-function cerrar() {
-  document.getElementById("senalGrafica").innerText =
-    "🟡 IA esperando confirmación del mercado";
-  document.getElementById("msg").innerText = "Trade finalizado.";
-  actualizarIA();
-}
-
-/* ================= INIT ================= */
-actualizarIA();
-actualizar();
-</script>
-
-</body>
-</html>
+.led-compra { color:#00ff66; box-shadow:0 0 20px #00ff66; }
+.led-venta { color:#ff4444; box-shadow:0 0 20px #ff4444; }
+.led-alerta { color:#f1c40f; box-shadow:0 0 20px #f1c40f; }
+.led-cierra {
+  color
