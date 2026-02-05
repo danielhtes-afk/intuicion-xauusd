@@ -14,12 +14,168 @@ body {
   text-align: center;
 }
 
-header {
-  padding: 40px 20px;
-}
+header { padding: 40px 20px; }
 
-section {
+.panel {
+  background: #161a2f;
+  border-radius: 12px;
+  max-width: 900px;
+  margin: 20px auto;
   padding: 20px;
 }
 
-.panel
+button {
+  padding: 10px 16px;
+  margin: 5px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.buy { background:#2e7d32; color:#fff; }
+.sell { background:#c62828; color:#fff; }
+.close { background:#444; color:#fff; }
+
+input {
+  padding: 8px;
+  margin: 5px;
+  width: 120px;
+  border-radius: 6px;
+  border: none;
+  text-align: center;
+}
+
+.signalOverlay {
+  margin-top: 10px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+footer {
+  font-size: 12px;
+  color: #aaa;
+  padding: 30px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>🤖 IA de Intuición para XAUUSD</h1>
+<p>
+Copiloto inteligente para scalping en oro.<br>
+Tú decides la entrada, la IA te ayuda a maximizar la salida.
+</p>
+</header>
+
+<!-- GRÁFICA -->
+<section class="panel">
+<iframe
+  src="https://www.tradingview.com/widgetembed/?symbol=OANDA%3AXAUUSD&interval=1&theme=dark&style=1&locale=es"
+  style="width:100%; height:500px; border:none; border-radius:12px;">
+</iframe>
+
+<div class="signalOverlay" id="senalGrafica">
+🟡 IA esperando confirmación del mercado
+</div>
+</section>
+
+<!-- SUGERENCIA IA -->
+<section class="panel">
+<h2>📊 Intuición IA (antes de operar)</h2>
+
+<p><strong>Contexto:</strong> <span id="contexto"></span></p>
+<p><strong>Sugerencia:</strong> <span id="sugerencia"></span></p>
+<p><strong>Duración estimada:</strong> <span id="duracion"></span></p>
+<p><strong>Confianza:</strong> <span id="confianza"></span></p>
+</section>
+
+<!-- CONFIGURACIÓN MANUAL -->
+<section class="panel">
+<h2>⚙️ Configuración de Trade</h2>
+
+<input id="pips" type="number" placeholder="Pips">
+<input id="lotes" type="number" placeholder="Lotes">
+<input id="apalancamiento" type="number" placeholder="Apalancamiento">
+
+<p><strong>Ganancia estimada:</strong>
+<span id="gananciaPct">0%</span> |
+<span id="gananciaUsd">$0.00</span>
+</p>
+
+<p><strong>Tiempo estimado para cerrar:</strong>
+<span id="tiempoCierre">—</span>
+</p>
+</section>
+
+<!-- SEGUIMIENTO -->
+<section class="panel">
+<h2>🧠 Seguimiento IA</h2>
+
+<button class="buy" onclick="iniciarTrade('COMPRA')">🟢 COMPRA</button>
+<button class="sell" onclick="iniciarTrade('VENTA')">🔴 VENTA</button>
+<button class="close" onclick="finalizarTrade()">⏹ Finalizar</button>
+
+<p id="mensaje"></p>
+</section>
+
+<footer>
+Aviso: Esta web es educativa. No constituye asesoramiento financiero.
+</footer>
+
+<script>
+// ================= INTUICIÓN IA =================
+const estados = ["FAVORABLE", "NEUTRO", "DESFAVORABLE"];
+const contexto = estados[Math.floor(Math.random()*3)];
+
+let sugerencia = "Esperar";
+let duracion = "—";
+let confianza = "—";
+
+if (contexto === "FAVORABLE") {
+  sugerencia = "🟢 Posible COMPRA";
+  duracion = "5–15 min";
+  confianza = "70%";
+} else if (contexto === "DESFAVORABLE") {
+  sugerencia = "🔴 Posible VENTA";
+  duracion = "5–15 min";
+  confianza = "70%";
+}
+
+document.getElementById("contexto").innerText = contexto;
+document.getElementById("sugerencia").innerText = sugerencia;
+document.getElementById("duracion").innerText = duracion;
+document.getElementById("confianza").innerText = confianza;
+
+document.getElementById("senalGrafica").innerText = sugerencia;
+
+// ================= CÁLCULOS =================
+setInterval(() => {
+  const pips = Number(pipsInput.value || 0);
+  const lotes = Number(lotesInput.value || 0);
+  const apal = Number(apalancamiento.value || 1);
+
+  const usd = pips * lotes * apal * 0.1;
+  const pct = usd / 100;
+
+  gananciaUsd.innerText = `$${usd.toFixed(2)}`;
+  gananciaPct.innerText = `${pct.toFixed(2)}%`;
+
+  tiempoCierre.innerText =
+    contexto === "FAVORABLE" ? "5–10 min" :
+    contexto === "DESFAVORABLE" ? "5–15 min" :
+    "Esperar confirmación";
+
+}, 2000);
+
+// ================= TRADE =================
+let tradeActivo = false;
+
+function iniciarTrade(tipo) {
+  tradeActivo = true;
+  mensaje.innerText = `Trade ${tipo} activo. IA monitoreando salida…`;
+}
+
+function finalizarTrade() {
+  tradeActivo =
