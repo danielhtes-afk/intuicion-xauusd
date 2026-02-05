@@ -4,72 +4,18 @@
 <meta charset="UTF-8">
 <title>Intuición XAUUSD – IA Copiloto</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <style>
-body{
-  margin:0;
-  font-family: Arial, sans-serif;
-  background:#0f1220;
-  color:#eaeaff;
-}
-header{
-  padding:12px;
-  text-align:center;
-  background:#161a33;
-  font-size:20px;
-  font-weight:bold;
-}
-.container{
-  display:grid;
-  grid-template-columns: 2fr 1fr;
-  gap:10px;
-  padding:10px;
-}
-.card{
-  background:#161a33;
-  border-radius:10px;
-  padding:10px;
-}
-h3{
-  margin:6px 0;
-  color:#7dd3fc;
-}
-input, button, textarea{
-  width:100%;
-  margin-top:6px;
-  padding:8px;
-  border-radius:6px;
-  border:none;
-}
-button{
-  background:#2563eb;
-  color:white;
-  font-weight:bold;
-  cursor:pointer;
-}
-.signal{
-  font-size:22px;
-  text-align:center;
-  padding:12px;
-  border-radius:8px;
-  margin-top:8px;
-}
-.buy{background:#14532d;color:#4ade80;}
-.sell{background:#7f1d1d;color:#f87171;}
-.wait{background:#1f2933;color:#facc15;}
-.chat-box{
-  height:220px;
-  overflow-y:auto;
-  background:#0b0e1a;
-  padding:6px;
-  border-radius:6px;
-}
-.chat-msg{
-  margin:4px 0;
-  font-size:14px;
-}
-.user{color:#7dd3fc;}
-.ia{color:#a7f3d0;}
+body{margin:0;font-family:Arial;background:#0f1220;color:#eaeaff}
+header{background:#161a33;padding:12px;text-align:center;font-size:20px;font-weight:bold}
+.container{display:grid;grid-template-columns:2fr 1fr;gap:10px;padding:10px}
+.card{background:#161a33;border-radius:10px;padding:10px}
+h3{color:#7dd3fc;margin:6px 0}
+button,textarea{width:100%;padding:8px;margin-top:6px;border:none;border-radius:6px}
+button{background:#2563eb;color:white;font-weight:bold}
+.semaforo{width:22px;height:22px;border-radius:50%;display:inline-block;background:gray}
+.chat-box{background:#0b0e1a;border-radius:6px;padding:6px;height:200px;overflow-y:auto}
+.chat-msg{font-size:14px;margin:4px 0}
+.user{color:#7dd3fc}.ia{color:#a7f3d0}
 </style>
 </head>
 
@@ -81,108 +27,109 @@ button{
 
 <!-- GRÁFICA -->
 <div class="card">
-<h3>📈 Gráfica en vivo</h3>
-<div style="height:420px;">
+<h3>📈 Gráfica</h3>
+<div id="tv_chart" style="height:420px;"></div>
 <script src="https://s3.tradingview.com/tv.js"></script>
 <script>
 new TradingView.widget({
-  "symbol": "OANDA:XAUUSD",
-  "interval": "15",
-  "timezone": "Europe/Madrid",
-  "theme": "dark",
-  "style": "1",
-  "locale": "es",
-  "container_id": "tv_chart",
-  "hide_side_toolbar": false,
-  "allow_symbol_change": false,
-  "save_image": false,
-  "studies": ["RSI@tv-basicstudies","MACD@tv-basicstudies"]
+  symbol:"OANDA:XAUUSD",
+  interval:"15",
+  timezone:"Europe/Madrid",
+  theme:"dark",
+  container_id:"tv_chart",
+  studies:["RSI@tv-basicstudies","EMA@tv-basicstudies"]
 });
 </script>
-<div id="tv_chart" style="height:100%;"></div>
-</div>
-</div>
-
-<!-- PANEL IA -->
-<div class="card">
-
-<h3>🤖 Señal IA</h3>
-<div id="signal" class="signal wait">ESPERANDO DATOS...</div>
-
-<h3>⚙️ Gestión</h3>
-<input id="lote" placeholder="Lote (ej: 0.10)">
-<input id="pips" placeholder="Pips objetivo">
-<input id="apal" placeholder="Apalancamiento (ej: 100)">
-<button onclick="calcular()">Calcular Ganancia</button>
-<div id="resultado"></div>
 
 <h3>💬 Chat IA</h3>
 <div class="chat-box" id="chat"></div>
 <textarea id="msg" placeholder="Habla con la IA..."></textarea>
 <button onclick="enviar()">Enviar</button>
+</div>
+
+<!-- PANEL IA -->
+<div class="card">
+
+<h3>🧠 Intuición (ANTES)</h3>
+<div id="contexto">Contexto: —</div>
+<div id="tiempoEntrada">⏱️ Tiempo óptimo: —</div>
+<div>⏳ Entrada en: <span id="contador">—</span></div>
+
+<hr>
+
+<h3>📌 Avisar a la IA</h3>
+<button onclick="iniciarTrade('BUY')" style="background:#14532d">🟢 Ya entré en COMPRA</button>
+<button onclick="iniciarTrade('SELL')" style="background:#7f1d1d">🔴 Ya entré en VENTA</button>
+
+<div id="direccion">Dirección: —</div>
+<div id="ganancia">Ganancia: 0</div>
+<div>Semáforo <span id="semaforo" class="semaforo"></span></div>
+<div id="mensajeIA"></div>
 
 </div>
 </div>
 
 <script>
-// ⚠️ d3cd94ff08974ed893ad7f77c1cd3b87
-const API_KEY = "d3cd94ff08974ed893ad7f77c1cd3b87 ";
-const SYMBOL = "XAUUSD";
+const API_KEY="d3cd94ff08974ed893ad7f77c1cd3b87";
+const SYMBOL="XAU/USD";
+const INTERVAL="15min";
 
-// CHAT
-function addMsg(text, cls){
-  const chat = document.getElementById("chat");
-  chat.innerHTML += `<div class="chat-msg ${cls}">${text}</div>`;
-  chat.scrollTop = chat.scrollHeight;
-}
+let tradeActivo=null,precioEntrada=0,ultimoPrecio=0;
+let contadorInterval=null,tiempoRestante=0;
 
-// ENVÍO CHAT
 function enviar(){
-  const m = msg.value;
-  if(!m) return;
-  addMsg("🧑‍💻 " + m, "user");
+  if(!msg.value) return;
+  chat.innerHTML+=`<div class="chat-msg user">🧑‍💻 ${msg.value}</div>`;
+  setTimeout(()=>chat.innerHTML+=`<div class="chat-msg ia">🤖 Mantén disciplina y sigue el plan.</div>`,500);
   msg.value="";
-  setTimeout(()=>{
-    addMsg("🤖 IA: Mantén disciplina. El mercado se está definiendo.", "ia");
-  },600);
+  chat.scrollTop=chat.scrollHeight;
 }
 
-// CÁLCULO
-function calcular(){
-  const lote = parseFloat(lote.value || 0);
-  const pips = parseFloat(pips.value || 0);
-  const res = lote * pips * 10;
-  resultado.innerHTML = "💰 Posible ganancia: $" + res.toFixed(2);
+function iniciarContador(m){
+  clearInterval(contadorInterval);
+  tiempoRestante=m*60;
+  contadorInterval=setInterval(()=>{
+    tiempoRestante--;
+    contador.innerText=Math.floor(tiempoRestante/60)+":"+String(tiempoRestante%60).padStart(2,"0");
+    if(tiempoRestante<=0){clearInterval(contadorInterval);contador.innerText="ENTRAR AHORA";}
+  },1000);
 }
 
-// DATOS REALES
+function iniciarTrade(tipo){
+  tradeActivo=tipo;
+  precioEntrada=ultimoPrecio;
+  direccion.innerText="Dirección: "+(tipo==="BUY"?"⬆️ COMPRA":"⬇️ VENTA");
+  mensajeIA.innerText="🤖 Trade activo. Ahora te acompaño.";
+}
+
+function calcularRSI(c){
+  let g=0,l=0;
+  for(let i=c.length-14;i<c.length-1;i++){
+    const d=c[i+1]-c[i]; d>=0?g+=d:l-=d;
+  }
+  return 100-(100/(1+g/(l||1)));
+}
+
 async function datos(){
-  try{
-    const r = await fetch(`https://api.twelvedata.com/quote?symbol=${SYMBOL}&apikey=${API_KEY}`);
-    const d = await r.json();
-    analizar(d.price);
-  }catch(e){
-    console.log(e);
-  }
-}
+  const r=await fetch(`https://api.twelvedata.com/time_series?symbol=${SYMBOL}&interval=${INTERVAL}&outputsize=50&apikey=${API_KEY}`);
+  const d=await r.json(); if(!d.values) return;
+  const c=d.values.map(v=>+v.close).reverse();
+  ultimoPrecio=c.at(-1);
+  const rsi=calcularRSI(c);
+  const mom=c.at(-1)-c.at(-6);
 
-// IA SIMPLE
-function analizar(price){
-  let s = document.getElementById("signal");
-  if(price % 2 > 1){
-    s.className="signal buy";
-    s.innerHTML="🟢 COMPRA";
-  }else if(price % 2 < 0.5){
-    s.className="signal sell";
-    s.innerHTML="🔴 VENTA";
+  if(!tradeActivo){
+    if(rsi>45&&rsi<55){contexto.innerText="Mercado cargándose";tiempoEntrada.innerText="Esperar 5 min";iniciarContador(5);}
+    else if(rsi<35&&mom>0){contexto.innerText="Rebote probable";tiempoEntrada.innerText="Entrada en 2 min";iniciarContador(2);}
+    else{contexto.innerText="No claro";contador.innerText="—";}
   }else{
-    s.className="signal wait";
-    s.innerHTML="🟡 ESPERAR";
+    const g=tradeActivo==="BUY"?ultimoPrecio-precioEntrada:precioEntrada-ultimoPrecio;
+    ganancia.innerText="Ganancia: "+g.toFixed(2);
+    if(g>0){semaforo.style.background="lime";mensajeIA.innerText="🟢 Mantén";}
+    else{semaforo.style.background="red";mensajeIA.innerText="🔴 Riesgo alto";}
   }
 }
-
-// LOOP
-setInterval(datos, 15000);
+datos();setInterval(datos,15000);
 </script>
 
 </body>
