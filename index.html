@@ -7,138 +7,89 @@
 <script src="https://s3.tradingview.com/tv.js"></script>
 
 <style>
-body{
-  margin:0;
-  background:#0f1220;
-  font-family:Arial, sans-serif;
-  color:#fff;
-}
-.app{padding:10px;}
+body{margin:0;background:#0f1220;font-family:Arial;color:#fff}
+.app{padding:10px}
 .card{
   background:linear-gradient(180deg,#141a33,#0d1225);
-  border-radius:18px;
-  padding:15px;
-  margin-bottom:15px;
-  box-shadow:0 10px 25px rgba(0,0,0,.4);
+  border-radius:18px;padding:15px;margin-bottom:15px;
+  box-shadow:0 10px 25px rgba(0,0,0,.4)
 }
-h3{text-align:center;color:#27e8ff;margin:0 0 12px;}
-#tvchart{height:320px;border-radius:16px;overflow:hidden;}
+h3{text-align:center;color:#27e8ff;margin:0 0 10px}
+#tvchart{height:320px;border-radius:16px;overflow:hidden}
 .btn{
   width:100%;padding:14px;font-size:16px;
-  border:none;border-radius:14px;
-  margin-bottom:10px;font-weight:bold;cursor:pointer;
+  border:none;border-radius:14px;margin-bottom:10px;
+  font-weight:bold;cursor:pointer
 }
-.buy{background:#00c853;color:#000;}
-.sell{background:#ff5252;color:#000;}
-.close{background:#ffd600;color:#000;}
-.positive{background:#00e676;color:#000;}
-.negative{background:#ff1744;color:#000;}
-.semaforo{display:flex;justify-content:center;gap:18px;margin:15px 0;}
-.luz{
-  width:18px;height:18px;border-radius:50%;
-  background:#333;
-}
-.verde.on{background:#00e676;box-shadow:0 0 10px #00e676;}
-.amarillo.on{background:#ffd600;box-shadow:0 0 10px #ffd600;}
-.rojo.on{background:#ff1744;box-shadow:0 0 10px #ff1744;}
-.text{font-size:14px;margin:6px 0;}
-.big{font-size:20px;font-weight:bold;color:#27e8ff;}
-hr{border:0;border-top:1px solid #333;margin:10px 0;}
+.buy{background:#00c853;color:#000}
+.sell{background:#ff5252;color:#000}
+.close{background:#ffd600;color:#000}
+.positive{background:#00e676;color:#000}
+.negative{background:#ff1744;color:#000}
+.semaforo{display:flex;justify-content:center;gap:18px;margin:10px 0}
+.luz{width:18px;height:18px;border-radius:50%;background:#333}
+.verde.on{background:#00e676;box-shadow:0 0 10px #00e676}
+.amarillo.on{background:#ffd600;box-shadow:0 0 10px #ffd600}
+.rojo.on{background:#ff1744;box-shadow:0 0 10px #ff1744}
+.text{font-size:14px;margin:6px 0}
+.big{font-size:18px;font-weight:bold;color:#27e8ff}
+hr{border:0;border-top:1px solid #333;margin:10px 0}
 </style>
 </head>
 
 <body>
 <div class="app">
 
-  <!-- GRÁFICA -->
-  <div class="card">
-    <div id="tvchart"></div>
-  </div>
+<!-- GRÁFICA -->
+<div class="card"><div id="tvchart"></div></div>
 
-  <!-- CONTROL OPERACIÓN -->
-  <div class="card">
-    <h3>🧠 Control de Operación</h3>
+<!-- POSIBLE ENTRADA -->
+<div class="card">
+<h3>🎯 Posible Entrada</h3>
+<div class="text">Dirección sugerida: <b id="entradaDir">—</b></div>
+<div class="text">Probabilidad: <b id="entradaProb">—</b></div>
+<div class="text">Estado: <b id="entradaEstado">—</b></div>
+</div>
 
-    <button class="btn buy" onclick="entrarCompra()">Entré en COMPRA</button>
-    <button class="btn sell" onclick="entrarVenta()">Entré en VENTA</button>
-    <button class="btn close" onclick="finalizar()">Finalizar operación</button>
+<!-- CONTROL -->
+<div class="card">
+<h3>🧠 Control de Operación</h3>
+<button class="btn buy" onclick="entrar('BUY')">Entré en COMPRA</button>
+<button class="btn sell" onclick="entrar('SELL')">Entré en VENTA</button>
+<button class="btn close" onclick="finalizar()">Finalizar</button>
 
-    <div class="semaforo">
-      <div id="verde" class="luz verde"></div>
-      <div id="amarillo" class="luz amarillo"></div>
-      <div id="rojo" class="luz rojo"></div>
-    </div>
+<div class="semaforo">
+<div id="verde" class="luz verde"></div>
+<div id="amarillo" class="luz amarillo"></div>
+<div id="rojo" class="luz rojo"></div>
+</div>
 
-    <button class="btn positive" onclick="resultado(true)">Resultado POSITIVO</button>
-    <button class="btn negative" onclick="resultado(false)">Resultado NEGATIVO</button>
+<button class="btn positive" onclick="resultado(true)">Resultado POSITIVO</button>
+<button class="btn negative" onclick="resultado(false)">Resultado NEGATIVO</button>
+<div class="text">Estado: <b id="estado">Esperando…</b></div>
+</div>
 
-    <div class="text">Estado: <b id="estado">Esperando entrada…</b></div>
-  </div>
+<!-- ESTADÍSTICAS -->
+<div class="card">
+<h3>📊 Estadísticas IA</h3>
+<div class="text">Total operaciones: <b id="sTotal">0</b></div>
+<div class="text">Acierto global: <b id="sGlobal">0%</b></div>
+<div class="text">Compra: <b id="sBuy">0%</b></div>
+<div class="text">Venta: <b id="sSell">0%</b></div>
+<div class="text">Recomendación: <span class="big" id="sReco">—</span></div>
+</div>
 
-  <!-- ESTADO APP -->
-  <div class="card">
-    <h3>⚙️ Estado del Aplicativo</h3>
-    <div class="text">¿El aplicativo va lento?</div>
-    <button class="btn negative" onclick="setEstadoApp(true)">Sí, va lento</button>
-    <button class="btn positive" onclick="setEstadoApp(false)">No, todo va bien</button>
-    <div class="text">Modo: <b id="estadoApp" class="big">NORMAL</b></div>
-  </div>
-
-  <!-- INTUICIÓN IA -->
-  <div class="card">
-    <h3>📊 Intuición IA · Comparativa</h3>
-
-    <div class="text">Dirección probable:
-      <span class="big" id="dirPred">ALCISTA 📈</span>
-    </div>
-
-    <hr>
-
-    <div class="text">
-      🟢 Alcista → Fuerza <b id="fAlc">72%</b> |
-      Impulso <b id="iAlc">Alto</b> |
-      Tiempo <b id="tAlc">8 min</b>
-    </div>
-
-    <div class="text">
-      🔴 Bajista → Fuerza <b id="fBaj">28%</b> |
-      Impulso <b id="iBaj">Débil</b> |
-      Tiempo <b id="tBaj">5 min</b>
-    </div>
-
-    <div class="text">
-      Sesgo IA:
-      <span class="big" id="sesgo">Continuación alcista</span>
-    </div>
-  </div>
-
-  <!-- PRÓXIMA ENTRADA -->
-  <div class="card">
-    <h3>📈 Próxima Entrada · Proyección</h3>
-
-    <div class="text">
-      Probabilidad ganadora:
-      <span class="big" id="prob">68%</span>
-    </div>
-
-    <div class="text">
-      Escenario ALZA → Ganancia <b id="gAlza">+1.8%</b> | Riesgo <b id="rAlza">0.6%</b>
-    </div>
-
-    <div class="text">
-      Escenario BAJA → Ganancia <b id="gBaja">+1.2%</b> | Riesgo <b id="rBaja">0.9%</b>
-    </div>
-
-    <div class="text">
-      Recomendación:
-      <span class="big" id="rec">Esperar confirmación</span>
-    </div>
-  </div>
+<!-- INTUICIÓN MULTI TF -->
+<div class="card">
+<h3>🧭 Intuición IA · Estructura</h3>
+<div class="text">1m → <b id="tf1">—</b></div>
+<div class="text">5m → <b id="tf5">—</b></div>
+<div class="text">15m → <b id="tf15">—</b></div>
+</div>
 
 </div>
 
 <script>
-// TradingView
 new TradingView.widget({
   autosize:true,
   symbol:"OANDA:XAUUSD",
@@ -148,71 +99,64 @@ new TradingView.widget({
   container_id:"tvchart"
 });
 
-let modoOptimizado=false;
+let stats={t:0,w:0,bw:0,bt:0,sw:0,st:0}
+let actual=null
 
-function resetLuces(){
-  document.querySelectorAll('.luz').forEach(l=>l.classList.remove('on'));
+function luces(v,a,r){
+  verde.classList.toggle("on",v)
+  amarillo.classList.toggle("on",a)
+  rojo.classList.toggle("on",r)
 }
 
-function entrarCompra(){
-  resetLuces();
-  verde.classList.add('on');
-  estado.innerText="COMPRA activa";
-}
-
-function entrarVenta(){
-  resetLuces();
-  rojo.classList.add('on');
-  estado.innerText="VENTA activa";
+function entrar(dir){
+  actual=dir
+  estado.innerText=dir+" activa"
+  luces(true,false,false)
 }
 
 function finalizar(){
-  resetLuces();
-  amarillo.classList.add('on');
-  estado.innerText="Operación finalizada";
+  luces(false,true,false)
+  estado.innerText="Posible salida"
 }
 
 function resultado(win){
-  estado.innerText = win ? "Resultado POSITIVO ✅" : "Resultado NEGATIVO ❌";
-  actualizarIA();
+  if(!actual) return
+  stats.t++
+  if(actual==="BUY"){stats.bt++; if(win)stats.bw++}
+  if(actual==="SELL"){stats.st++; if(win)stats.sw++}
+  if(win)stats.w++
+  actualizar()
 }
 
-function setEstadoApp(lento){
-  modoOptimizado=lento;
-  estadoApp.innerText = lento ? "OPTIMIZADO" : "NORMAL";
+function actualizar(){
+  let pg=stats.t?Math.round(stats.w/stats.t*100):50
+  let pb=stats.bt?Math.round(stats.bw/stats.bt*100):50
+  let ps=stats.st?Math.round(stats.sw/stats.st*100):50
+
+  sTotal.innerText=stats.t
+  sGlobal.innerText=pg+"%"
+  sBuy.innerText=pb+"%"
+  sSell.innerText=ps+"%"
+
+  let dir=pb>ps?"COMPRA":"VENTA"
+  let prob=Math.max(pb,ps)
+
+  entradaDir.innerText=dir
+  entradaProb.innerText=prob+"%"
+  entradaEstado.innerText=prob>65?"🟢 Apta":prob>55?"🟡 Esperar":"🔴 No entrar"
+
+  sReco.innerText=prob>60?"ENTRAR":"NO ENTRAR"
+
+  if(prob<55) luces(false,false,true)
+  else if(prob<65) luces(false,true,false)
+  else luces(true,false,false)
+
+  tf1.innerText=(Math.random()>0.5?"ALZA":"BAJA")+" "+Math.round(prob-5)+"%"
+  tf5.innerText=(Math.random()>0.5?"ALZA":"BAJA")+" "+prob+"%"
+  tf15.innerText=(Math.random()>0.5?"ALZA":"BAJA")+" "+Math.round(prob-10)+"%"
 }
 
-function actualizarIA(){
-  let alc = Math.floor(Math.random()*20)+60;
-  let baj = 100-alc;
-
-  fAlc.innerText=alc+"%";
-  fBaj.innerText=baj+"%";
-
-  iAlc.innerText=alc>70?"Alto":"Medio";
-  iBaj.innerText=baj>40?"Medio":"Débil";
-
-  tAlc.innerText=(modoOptimizado?5:8)+" min";
-  tBaj.innerText=(modoOptimizado?4:6)+" min";
-
-  if(alc>baj){
-    dirPred.innerText="ALCISTA 📈";
-    sesgo.innerText="Continuación alcista";
-    rec.innerText="Buscar COMPRA";
-  }else{
-    dirPred.innerText="BAJISTA 📉";
-    sesgo.innerText="Continuación bajista";
-    rec.innerText="Buscar VENTA";
-  }
-
-  prob.innerText=(Math.floor(Math.random()*15)+60)+"%";
-  gAlza.innerText="+"+(Math.random()*2+1).toFixed(2)+"%";
-  rAlza.innerText=(Math.random()*0.8+0.3).toFixed(2)+"%";
-  gBaja.innerText="+"+(Math.random()*2+0.8).toFixed(2)+"%";
-  rBaja.innerText=(Math.random()*1+0.4).toFixed(2)+"%";
-}
-
-actualizarIA();
+actualizar()
 </script>
 </body>
 </html>
