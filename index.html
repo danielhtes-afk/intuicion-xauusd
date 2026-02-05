@@ -2,199 +2,187 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>IA XAUUSD AUTO – Intuición de Mercado</title>
+<title>Intuición XAUUSD – IA Copiloto</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<script src="https://s3.tradingview.com/tv.js"></script>
 
 <style>
 body{
   margin:0;
-  font-family:Arial, sans-serif;
+  font-family: Arial, sans-serif;
   background:#0f1220;
-  color:#fff;
+  color:#eaeaff;
 }
 header{
-  padding:15px;
+  padding:12px;
   text-align:center;
-  background:#151933;
+  background:#161a33;
   font-size:20px;
   font-weight:bold;
 }
 .container{
   display:grid;
-  grid-template-columns:2fr 1fr;
+  grid-template-columns: 2fr 1fr;
   gap:10px;
   padding:10px;
 }
-.panel{
-  background:#151933;
+.card{
+  background:#161a33;
   border-radius:10px;
   padding:10px;
 }
-#signal{
-  font-size:22px;
-  text-align:center;
-  margin:10px 0;
+h3{
+  margin:6px 0;
+  color:#7dd3fc;
 }
-#semaforo{
-  width:25px;
-  height:25px;
-  border-radius:50%;
-  margin:0 auto;
-  background:gray;
-}
-input,button{
+input, button, textarea{
   width:100%;
-  margin-top:5px;
-  padding:6px;
+  margin-top:6px;
+  padding:8px;
+  border-radius:6px;
   border:none;
-  border-radius:5px;
 }
 button{
-  background:#2e7cff;
-  color:#fff;
+  background:#2563eb;
+  color:white;
   font-weight:bold;
+  cursor:pointer;
 }
-#chat{
-  height:180px;
+.signal{
+  font-size:22px;
+  text-align:center;
+  padding:12px;
+  border-radius:8px;
+  margin-top:8px;
+}
+.buy{background:#14532d;color:#4ade80;}
+.sell{background:#7f1d1d;color:#f87171;}
+.wait{background:#1f2933;color:#facc15;}
+.chat-box{
+  height:220px;
   overflow-y:auto;
-  background:#0f1220;
-  padding:8px;
-  border-radius:5px;
-  font-size:13px;
+  background:#0b0e1a;
+  padding:6px;
+  border-radius:6px;
 }
-.msg{
-  margin-bottom:6px;
+.chat-msg{
+  margin:4px 0;
+  font-size:14px;
 }
-.ia{ color:#00ffcc; }
-.user{ color:#ffd966; }
+.user{color:#7dd3fc;}
+.ia{color:#a7f3d0;}
 </style>
 </head>
 
 <body>
 
-<header>🧠 IA XAUUSD AUTO – Copiloto de Trading</header>
+<header>🧠 Intuición XAUUSD – IA Copiloto</header>
 
 <div class="container">
 
-  <!-- GRAFICA -->
-  <div class="panel">
-    <div id="tvchart"></div>
-  </div>
+<!-- GRÁFICA -->
+<div class="card">
+<h3>📈 Gráfica en vivo</h3>
+<div style="height:420px;">
+<script src="https://s3.tradingview.com/tv.js"></script>
+<script>
+new TradingView.widget({
+  "symbol": "OANDA:XAUUSD",
+  "interval": "15",
+  "timezone": "Europe/Madrid",
+  "theme": "dark",
+  "style": "1",
+  "locale": "es",
+  "container_id": "tv_chart",
+  "hide_side_toolbar": false,
+  "allow_symbol_change": false,
+  "save_image": false,
+  "studies": ["RSI@tv-basicstudies","MACD@tv-basicstudies"]
+});
+</script>
+<div id="tv_chart" style="height:100%;"></div>
+</div>
+</div>
 
-  <!-- PANEL IA -->
-  <div class="panel">
-    <div id="signal">⏳ Esperando mercado...</div>
-    <div id="semaforo"></div>
+<!-- PANEL IA -->
+<div class="card">
 
-    <hr>
+<h3>🤖 Señal IA</h3>
+<div id="signal" class="signal wait">ESPERANDO DATOS...</div>
 
-    <label>Apalancamiento</label>
-    <input type="number" id="leverage" value="50">
+<h3>⚙️ Gestión</h3>
+<input id="lote" placeholder="Lote (ej: 0.10)">
+<input id="pips" placeholder="Pips objetivo">
+<input id="apal" placeholder="Apalancamiento (ej: 100)">
+<button onclick="calcular()">Calcular Ganancia</button>
+<div id="resultado"></div>
 
-    <label>Lotes</label>
-    <input type="number" id="lots" value="0.01" step="0.01">
+<h3>💬 Chat IA</h3>
+<div class="chat-box" id="chat"></div>
+<textarea id="msg" placeholder="Habla con la IA..."></textarea>
+<button onclick="enviar()">Enviar</button>
 
-    <label>Pips objetivo</label>
-    <input type="number" id="pips" value="50">
-
-    <button onclick="calcular()">Calcular Ganancia</button>
-    <div id="resultado"></div>
-
-    <hr>
-
-    <div id="chat"></div>
-    <input type="text" id="userInput" placeholder="Habla con la IA…">
-    <button onclick="enviar()">Enviar</button>
-  </div>
-
+</div>
 </div>
 
 <script>
-// 🔑 TU API KEY DE TWELVEDATA
-const API_KEY = d3cd94ff08974ed893ad7f77c1cd3b87 ;
+// ⚠️ d3cd94ff08974ed893ad7f77c1cd3b87
+const API_KEY = "d3cd94ff08974ed893ad7f77c1cd3b87 ";
+const SYMBOL = "XAUUSD";
 
-// TradingView
-new TradingView.widget({
-  autosize:true,
-  symbol:"OANDA:XAUUSD",
-  interval:"5",
-  timezone:"Etc/UTC",
-  theme:"dark",
-  style:"1",
-  locale:"es",
-  container_id:"tvchart"
-});
-
-// Datos mercado
-let precioActual = 0;
-
-async function obtenerPrecio(){
-  const res = await fetch(`https://api.twelvedata.com/price?symbol=XAU/USD&apikey=${API_KEY}`);
-  const data = await res.json();
-  if(data.price){
-    precioActual = parseFloat(data.price);
-    analizar();
-  }
-}
-setInterval(obtenerPrecio,5000);
-
-// IA ANALÍTICA + INTUITIVA
-function analizar(){
-  let signal = "ESPERAR";
-  let color = "gray";
-
-  if(precioActual % 2 > 1){
-    signal = "📈 COMPRA";
-    color = "green";
-  }else if(precioActual % 2 < 0.5){
-    signal = "📉 VENTA";
-    color = "red";
-  }
-
-  document.getElementById("signal").innerText = signal;
-  document.getElementById("semaforo").style.background = color;
-
-  iaMensaje(`Precio actual: ${precioActual} → Señal: ${signal}`);
+// CHAT
+function addMsg(text, cls){
+  const chat = document.getElementById("chat");
+  chat.innerHTML += `<div class="chat-msg ${cls}">${text}</div>`;
+  chat.scrollTop = chat.scrollHeight;
 }
 
-// CALCULO
-function calcular(){
-  const lots = parseFloat(document.getElementById("lots").value);
-  const pips = parseFloat(document.getElementById("pips").value);
-  const ganancia = lots * pips * 10;
-  document.getElementById("resultado").innerText =
-    `💰 Ganancia estimada: $${ganancia.toFixed(2)}`;
-}
-
-// CHAT IA
+// ENVÍO CHAT
 function enviar(){
-  const input = document.getElementById("userInput");
-  const texto = input.value;
-  if(!texto) return;
-
-  agregarMsg("user",texto);
-  input.value="";
-
-  let respuesta = "Estoy analizando el mercado… espera confirmación.";
-  if(texto.toLowerCase().includes("cerrar")){
-    respuesta = "Sugiero cerrar parcialmente y asegurar ganancias.";
-  }
-  if(texto.toLowerCase().includes("entrar")){
-    respuesta = document.getElementById("signal").innerText;
-  }
-
-  setTimeout(()=>agregarMsg("ia",respuesta),500);
+  const m = msg.value;
+  if(!m) return;
+  addMsg("🧑‍💻 " + m, "user");
+  msg.value="";
+  setTimeout(()=>{
+    addMsg("🤖 IA: Mantén disciplina. El mercado se está definiendo.", "ia");
+  },600);
 }
 
-function agregarMsg(tipo,texto){
-  const div = document.createElement("div");
-  div.className = `msg ${tipo}`;
-  div.innerText = (tipo==="ia"?"IA: ":"Tú: ") + texto;
-  document.getElementById("chat").appendChild(div);
-  document.getElementById("chat").scrollTop = 9999;
+// CÁLCULO
+function calcular(){
+  const lote = parseFloat(lote.value || 0);
+  const pips = parseFloat(pips.value || 0);
+  const res = lote * pips * 10;
+  resultado.innerHTML = "💰 Posible ganancia: $" + res.toFixed(2);
 }
+
+// DATOS REALES
+async function datos(){
+  try{
+    const r = await fetch(`https://api.twelvedata.com/quote?symbol=${SYMBOL}&apikey=${API_KEY}`);
+    const d = await r.json();
+    analizar(d.price);
+  }catch(e){
+    console.log(e);
+  }
+}
+
+// IA SIMPLE
+function analizar(price){
+  let s = document.getElementById("signal");
+  if(price % 2 > 1){
+    s.className="signal buy";
+    s.innerHTML="🟢 COMPRA";
+  }else if(price % 2 < 0.5){
+    s.className="signal sell";
+    s.innerHTML="🔴 VENTA";
+  }else{
+    s.className="signal wait";
+    s.innerHTML="🟡 ESPERAR";
+  }
+}
+
+// LOOP
+setInterval(datos, 15000);
 </script>
 
 </body>
