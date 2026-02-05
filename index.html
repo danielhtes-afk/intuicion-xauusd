@@ -6,67 +6,220 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #0f1220;
-  color: #fff;
-  text-align: center;
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#0f1220;
+  color:#fff;
+  text-align:center;
+}
+header{padding:25px}
+.panel{
+  background:#161a2f;
+  border-radius:12px;
+  max-width:900px;
+  margin:20px auto;
+  padding:20px;
+}
+button{
+  padding:10px 16px;
+  margin:5px;
+  border:none;
+  border-radius:6px;
+  font-weight:bold;
+  cursor:pointer;
+}
+.buy{background:#2ecc71}
+.sell{background:#e74c3c}
+.close{background:#555;color:#fff}
+input{
+  padding:8px;
+  margin:5px;
+  width:150px;
+  border-radius:6px;
+  border:none;
+  text-align:center;
+}
+.signalOverlay{
+  margin-top:10px;
+  font-size:20px;
+  font-weight:bold;
 }
 
-header { padding: 30px 15px; }
-
-.panel {
-  background: #161a2f;
-  border-radius: 12px;
-  max-width: 900px;
-  margin: 20px auto;
-  padding: 20px;
+/* LED */
+#panelLed{
+  background:#000;
+  font-size:32px;
+  font-weight:bold;
+  letter-spacing:3px;
+  padding:15px;
+  margin:20px auto;
+  max-width:900px;
+  border-radius:10px;
+}
+.led-compra{color:#00ff66;box-shadow:0 0 20px #00ff66}
+.led-venta{color:#ff4444;box-shadow:0 0 20px #ff4444}
+.led-alerta{color:#f1c40f;box-shadow:0 0 20px #f1c40f}
+.led-cierra{
+  color:#ff0000;
+  box-shadow:0 0 25px #ff0000;
+  animation:blink 1s infinite;
+}
+@keyframes blink{
+  0%{opacity:1}
+  50%{opacity:.4}
+  100%{opacity:1}
 }
 
-button {
-  padding: 10px 16px;
-  margin: 5px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
+/* SEMÁFORO */
+#semaforo{
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  margin-top:15px;
+}
+.luz{
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  background:#333;
+  opacity:.3;
+}
+.luz.activa{opacity:1}
+.verde.activa{background:#2ecc71}
+.amarillo.activa{background:#f1c40f}
+.rojo.activa{background:#e74c3c}
+
+#mensajeCierre{
+  font-size:22px;
+  font-weight:bold;
+  margin-top:15px;
+}
+footer{font-size:12px;color:#aaa;padding:25px}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>🤖 IA Intuición XAUUSD</h1>
+<p>Copiloto visual para scalping en oro</p>
+</header>
+
+<!-- LED -->
+<div id="panelLed" class="led-alerta">ESPERANDO SEÑAL</div>
+
+<!-- GRÁFICA -->
+<section class="panel">
+<iframe
+  src="https://www.tradingview.com/widgetembed/?symbol=OANDA%3AXAUUSD&interval=1&theme=dark&style=1&locale=es"
+  style="width:100%;height:500px;border:none;border-radius:12px;">
+</iframe>
+<div class="signalOverlay" id="senalGrafica">🟡 IA esperando mercado</div>
+</section>
+
+<!-- SEGUIMIENTO -->
+<section class="panel">
+<h2>🧠 Seguimiento IA</h2>
+<button class="buy" onclick="iniciarTrade('COMPRA')">🟢 COMPRA</button>
+<button class="sell" onclick="iniciarTrade('VENTA')">🔴 VENTA</button>
+<button class="close" onclick="finalizarTrade()">⏹ Finalizar</button>
+
+<p id="mensaje"></p>
+
+<div id="semaforo">
+  <span class="luz verde"></span>
+  <span class="luz amarillo"></span>
+  <span class="luz rojo"></span>
+</div>
+
+<p id="mensajeCierre"></p>
+</section>
+
+<!-- IA -->
+<section class="panel">
+<h2>📊 Intuición IA</h2>
+<p><strong>Contexto:</strong> <span id="contexto"></span></p>
+<p><strong>Sugerencia:</strong> <span id="sugerencia"></span></p>
+<p><strong>Duración:</strong> <span id="duracion"></span></p>
+<p><strong>Confianza:</strong> <span id="confianza"></span></p>
+</section>
+
+<!-- CONFIG -->
+<section class="panel">
+<h2>⚙️ Configuración</h2>
+<input id="pips" type="number" step="0.01" placeholder="Pip (ej 0.10)">
+<input id="lotes" type="number" step="0.1" placeholder="Volumen">
+<input id="objetivoUsd" type="number" value="10" placeholder="Objetivo USD">
+<p><strong>Ganancia estimada:</strong> <span id="gananciaUsd">$0.00</span></p>
+</section>
+
+<footer>Uso educativo – no asesoramiento financiero</footer>
+
+<script>
+// ===== IA =====
+const estados=["SUBE","NEUTRO","BAJA"];
+const contexto=estados[Math.floor(Math.random()*3)];
+
+let sugerencia="",duracion="",confianza="";
+if(contexto==="SUBE"){
+  sugerencia="🟢 Impulso alcista";
+  duracion="3–10 min";
+  confianza="70%";
+}
+else if(contexto==="BAJA"){
+  sugerencia="🔴 Impulso bajista";
+  duracion="3–10 min";
+  confianza="70%";
+}
+else{
+  sugerencia="🟡 Mercado en rango";
+  duracion="1–3 min";
+  confianza="55%";
 }
 
-.buy { background:#2ecc71; }
-.sell { background:#e74c3c; }
-.close { background:#555; color:#fff; }
+document.getElementById("contexto").innerText=contexto;
+document.getElementById("sugerencia").innerText=sugerencia;
+document.getElementById("duracion").innerText=duracion;
+document.getElementById("confianza").innerText=confianza;
+document.getElementById("senalGrafica").innerText=sugerencia;
 
-input {
-  padding: 8px;
-  margin: 5px;
-  width: 140px;
-  border-radius: 6px;
-  border: none;
-  text-align: center;
+// ===== SEMÁFORO =====
+function limpiar(){
+  document.querySelectorAll(".luz").forEach(l=>l.classList.remove("activa"));
+}
+function activar(color){
+  limpiar();
+  document.querySelector("."+color).classList.add("activa");
 }
 
-.signalOverlay {
-  margin-top: 10px;
-  font-size: 20px;
-  font-weight: bold;
+// ===== LED =====
+function setLed(txt,cls){
+  const led=document.getElementById("panelLed");
+  led.innerText=txt;
+  led.className=cls;
 }
 
-/* ===== PANEL LED ===== */
-#panelLed {
-  background: #000;
-  font-size: 32px;
-  font-weight: bold;
-  letter-spacing: 3px;
-  padding: 15px;
-  margin: 20px auto;
-  max-width: 900px;
-  border-radius: 10px;
-  text-transform: uppercase;
+// ===== TRADE =====
+function iniciarTrade(tipo){
+  document.getElementById("mensaje").innerText="Trade "+tipo+" activo";
+  document.getElementById("mensajeCierre").innerText="🟢 Operación abierta";
+  activar("verde");
+}
+function finalizarTrade(){
+  document.getElementById("mensaje").innerText="Trade cerrado";
+  document.getElementById("mensajeCierre").innerText="🔴 CERRAR OPERACIÓN";
+  activar("rojo");
+  setLed("CIERRA","led-cierra");
 }
 
-.led-compra { color:#00ff66; box-shadow:0 0 20px #00ff66; }
-.led-venta { color:#ff4444; box-shadow:0 0 20px #ff4444; }
-.led-alerta { color:#f1c40f; box-shadow:0 0 20px #f1c40f; }
-.led-cierra {
-  color
+// ===== CÁLCULO =====
+setInterval(()=>{
+  const pip=Number(pips.value||0);
+  const vol=Number(lotes.value||1);
+  const obj=Number(objetivoUsd.value||0);
+
+  const ganancia=pip*vol*100;
+  gananciaUsd.innerText="$"+ganancia.toFixed(2);
+
+  if(obj>0 && gan
