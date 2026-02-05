@@ -13,13 +13,7 @@ body{
   font-family:Arial, sans-serif;
   color:#fff;
 }
-
-/* Contenedor */
-.app{
-  padding:10px;
-}
-
-/* Tarjetas */
+.app{padding:10px;}
 .card{
   background:linear-gradient(180deg,#141a33,#0d1225);
   border-radius:18px;
@@ -27,71 +21,33 @@ body{
   margin-bottom:15px;
   box-shadow:0 10px 25px rgba(0,0,0,.4);
 }
-
-h3{
-  margin:0 0 12px;
-  text-align:center;
-  color:#27e8ff;
-}
-
-/* Gráfica */
-#tvchart{
-  height:320px;
-  border-radius:16px;
-  overflow:hidden;
-}
-
-/* Botones */
+h3{text-align:center;color:#27e8ff;margin:0 0 12px;}
+#tvchart{height:320px;border-radius:16px;overflow:hidden;}
 .btn{
-  width:100%;
-  padding:14px;
-  font-size:16px;
-  border:none;
-  border-radius:14px;
-  margin-bottom:10px;
-  font-weight:bold;
-  cursor:pointer;
+  width:100%;padding:14px;font-size:16px;
+  border:none;border-radius:14px;
+  margin-bottom:10px;font-weight:bold;cursor:pointer;
 }
-
 .buy{background:#00c853;color:#000;}
 .sell{background:#ff5252;color:#000;}
 .close{background:#ffd600;color:#000;}
 .positive{background:#00e676;color:#000;}
 .negative{background:#ff1744;color:#000;}
-
-/* Semáforo */
-.semaforo{
-  display:flex;
-  justify-content:center;
-  gap:18px;
-  margin:15px 0;
-}
+.semaforo{display:flex;justify-content:center;gap:18px;margin:15px 0;}
 .luz{
-  width:18px;
-  height:18px;
-  border-radius:50%;
+  width:18px;height:18px;border-radius:50%;
   background:#333;
-  box-shadow:inset 0 0 6px rgba(0,0,0,.8);
 }
-.verde.on{background:#00e676; box-shadow:0 0 10px #00e676;}
-.amarillo.on{background:#ffd600; box-shadow:0 0 10px #ffd600;}
-.rojo.on{background:#ff1744; box-shadow:0 0 10px #ff1744;}
-
-/* Texto */
-.text{
-  font-size:14px;
-  margin:6px 0;
-}
-.big{
-  font-size:20px;
-  font-weight:bold;
-  color:#27e8ff;
-}
+.verde.on{background:#00e676;box-shadow:0 0 10px #00e676;}
+.amarillo.on{background:#ffd600;box-shadow:0 0 10px #ffd600;}
+.rojo.on{background:#ff1744;box-shadow:0 0 10px #ff1744;}
+.text{font-size:14px;margin:6px 0;}
+.big{font-size:20px;font-weight:bold;color:#27e8ff;}
+hr{border:0;border-top:1px solid #333;margin:10px 0;}
 </style>
 </head>
 
 <body>
-
 <div class="app">
 
   <!-- GRÁFICA -->
@@ -99,13 +55,13 @@ h3{
     <div id="tvchart"></div>
   </div>
 
-  <!-- CONTROL -->
+  <!-- CONTROL OPERACIÓN -->
   <div class="card">
     <h3>🧠 Control de Operación</h3>
 
     <button class="btn buy" onclick="entrarCompra()">Entré en COMPRA</button>
     <button class="btn sell" onclick="entrarVenta()">Entré en VENTA</button>
-    <button class="btn close" onclick="cerrarOperacion()">Cerré Operación</button>
+    <button class="btn close" onclick="finalizar()">Finalizar operación</button>
 
     <div class="semaforo">
       <div id="verde" class="luz verde"></div>
@@ -116,17 +72,67 @@ h3{
     <button class="btn positive" onclick="resultado(true)">Resultado POSITIVO</button>
     <button class="btn negative" onclick="resultado(false)">Resultado NEGATIVO</button>
 
-    <div class="text">Estado: <b id="estado">esperando entrada...</b></div>
+    <div class="text">Estado: <b id="estado">Esperando entrada…</b></div>
+  </div>
+
+  <!-- ESTADO APP -->
+  <div class="card">
+    <h3>⚙️ Estado del Aplicativo</h3>
+    <div class="text">¿El aplicativo va lento?</div>
+    <button class="btn negative" onclick="setEstadoApp(true)">Sí, va lento</button>
+    <button class="btn positive" onclick="setEstadoApp(false)">No, todo va bien</button>
+    <div class="text">Modo: <b id="estadoApp" class="big">NORMAL</b></div>
   </div>
 
   <!-- INTUICIÓN IA -->
   <div class="card">
-    <h3>📊 Intuición IA</h3>
+    <h3>📊 Intuición IA · Comparativa</h3>
 
-    <div class="text">Dirección: <span class="big" id="direccion">ALCISTA 📈</span></div>
-    <div class="text">Fuerza: <span class="big" id="fuerza">77%</span></div>
-    <div class="text">Tiempo estimado: <span class="big" id="tiempo">8 min</span></div>
-    <div class="text">Sugerencia: <span class="big" id="sugerencia">Mantener COMPRA</span></div>
+    <div class="text">Dirección probable:
+      <span class="big" id="dirPred">ALCISTA 📈</span>
+    </div>
+
+    <hr>
+
+    <div class="text">
+      🟢 Alcista → Fuerza <b id="fAlc">72%</b> |
+      Impulso <b id="iAlc">Alto</b> |
+      Tiempo <b id="tAlc">8 min</b>
+    </div>
+
+    <div class="text">
+      🔴 Bajista → Fuerza <b id="fBaj">28%</b> |
+      Impulso <b id="iBaj">Débil</b> |
+      Tiempo <b id="tBaj">5 min</b>
+    </div>
+
+    <div class="text">
+      Sesgo IA:
+      <span class="big" id="sesgo">Continuación alcista</span>
+    </div>
+  </div>
+
+  <!-- PRÓXIMA ENTRADA -->
+  <div class="card">
+    <h3>📈 Próxima Entrada · Proyección</h3>
+
+    <div class="text">
+      Probabilidad ganadora:
+      <span class="big" id="prob">68%</span>
+    </div>
+
+    <div class="text">
+      Escenario ALZA → Ganancia <b id="gAlza">+1.8%</b> | Riesgo <b id="rAlza">0.6%</b>
+    </div>
+
+    <div class="text">
+      Escenario BAJA → Ganancia <b id="gBaja">+1.2%</b> | Riesgo <b id="rBaja">0.9%</b>
+    </div>
+
+    <div class="text">
+      Recomendación:
+      <span class="big" id="rec">Esperar confirmación</span>
+    </div>
   </div>
 
 </div>
@@ -137,44 +143,76 @@ new TradingView.widget({
   autosize:true,
   symbol:"OANDA:XAUUSD",
   interval:"5",
-  timezone:"Etc/UTC",
   theme:"dark",
-  style:"1",
   locale:"es",
   container_id:"tvchart"
 });
 
-// Semáforo
+let modoOptimizado=false;
+
 function resetLuces(){
   document.querySelectorAll('.luz').forEach(l=>l.classList.remove('on'));
 }
 
 function entrarCompra(){
   resetLuces();
-  document.getElementById('verde').classList.add('on');
+  verde.classList.add('on');
   estado.innerText="COMPRA activa";
-  direccion.innerText="ALCISTA 📈";
-  sugerencia.innerText="Mantener COMPRA";
 }
 
 function entrarVenta(){
   resetLuces();
-  document.getElementById('rojo').classList.add('on');
+  rojo.classList.add('on');
   estado.innerText="VENTA activa";
-  direccion.innerText="BAJISTA 📉";
-  sugerencia.innerText="Mantener VENTA";
 }
 
-function cerrarOperacion(){
+function finalizar(){
   resetLuces();
-  document.getElementById('amarillo').classList.add('on');
-  estado.innerText="Operación cerrada";
+  amarillo.classList.add('on');
+  estado.innerText="Operación finalizada";
 }
 
 function resultado(win){
   estado.innerText = win ? "Resultado POSITIVO ✅" : "Resultado NEGATIVO ❌";
+  actualizarIA();
 }
-</script>
 
+function setEstadoApp(lento){
+  modoOptimizado=lento;
+  estadoApp.innerText = lento ? "OPTIMIZADO" : "NORMAL";
+}
+
+function actualizarIA(){
+  let alc = Math.floor(Math.random()*20)+60;
+  let baj = 100-alc;
+
+  fAlc.innerText=alc+"%";
+  fBaj.innerText=baj+"%";
+
+  iAlc.innerText=alc>70?"Alto":"Medio";
+  iBaj.innerText=baj>40?"Medio":"Débil";
+
+  tAlc.innerText=(modoOptimizado?5:8)+" min";
+  tBaj.innerText=(modoOptimizado?4:6)+" min";
+
+  if(alc>baj){
+    dirPred.innerText="ALCISTA 📈";
+    sesgo.innerText="Continuación alcista";
+    rec.innerText="Buscar COMPRA";
+  }else{
+    dirPred.innerText="BAJISTA 📉";
+    sesgo.innerText="Continuación bajista";
+    rec.innerText="Buscar VENTA";
+  }
+
+  prob.innerText=(Math.floor(Math.random()*15)+60)+"%";
+  gAlza.innerText="+"+(Math.random()*2+1).toFixed(2)+"%";
+  rAlza.innerText=(Math.random()*0.8+0.3).toFixed(2)+"%";
+  gBaja.innerText="+"+(Math.random()*2+0.8).toFixed(2)+"%";
+  rBaja.innerText=(Math.random()*1+0.4).toFixed(2)+"%";
+}
+
+actualizarIA();
+</script>
 </body>
 </html>
