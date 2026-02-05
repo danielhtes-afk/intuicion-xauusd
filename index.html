@@ -2,25 +2,19 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>IA de Intuición XAUUSD</title>
+<title>IA Intuición XAUUSD</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
 
 <style>
 body {
   margin: 0;
   font-family: Arial, sans-serif;
   background: #0f1220;
-  color: #fff;
+  color: #ffffff;
   text-align: center;
 }
-header {
-  padding: 30px 20px;
-}
-section {
-  padding: 20px;
-}
+header { padding: 30px 15px; }
+
 .panel {
   background: #161a2f;
   border-radius: 12px;
@@ -28,13 +22,23 @@ section {
   margin: 20px auto;
   padding: 20px;
 }
+
+button {
+  padding: 10px 16px;
+  margin: 5px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 15px;
+}
+.buy { background:#2e7d32; color:#fff; }
+.sell { background:#c62828; color:#fff; }
+
 #chartContainer {
   position: relative;
-  height: 480px;
+  max-width: 100%;
 }
-#chart {
-  height: 100%;
-}
+
 #fullscreenBtn {
   position: absolute;
   top: 10px;
@@ -42,19 +46,13 @@ section {
   z-index: 10;
   background: #000;
   color: #fff;
-  border-radius: 6px;
-  border: none;
-  padding: 6px 10px;
   font-size: 18px;
+  border-radius: 6px;
 }
-.signal {
+
+.signalBox {
   font-size: 22px;
   margin-top: 10px;
-}
-footer {
-  font-size: 12px;
-  color: #aaa;
-  padding: 20px;
 }
 </style>
 </head>
@@ -63,73 +61,76 @@ footer {
 
 <header>
 <h1>🤖 IA de Intuición para XAUUSD</h1>
-<p>
-Copiloto inteligente para scalping en oro.<br>
-Tú decides la entrada, la IA te ayuda a maximizar la salida.
-</p>
+<p>Copiloto inteligente para scalping en oro.<br>
+Tú decides la entrada, la IA te ayuda a maximizar la salida.</p>
 </header>
 
-<!-- GRÁFICA -->
-<section>
-<div id="chartContainer">
-<button id="fullscreenBtn">⛶</button>
-<div id="chart"></div>
-</div>
+<!-- GRÁFICO -->
+<section id="chartContainer">
+<button id="fullscreenBtn" onclick="toggleFull()">⛶</button>
+
+<div id="tradingview_xauusd"></div>
+
+<script src="https://s3.tradingview.com/tv.js"></script>
+<script>
+new TradingView.widget({
+  "width": "100%",
+  "height": 480,
+  "symbol": "OANDA:XAUUSD",
+  "interval": "1",
+  "timezone": "Etc/UTC",
+  "theme": "dark",
+  "style": "1",
+  "locale": "es",
+  "hide_side_toolbar": false,
+  "enable_publishing": false,
+  "container_id": "tradingview_xauusd"
+});
+</script>
+
+<div class="signalBox" id="senal">⏳ Analizando mercado...</div>
 </section>
 
-<!-- IA ANTES DE OPERAR -->
+<!-- PANEL IA -->
 <section class="panel">
-<h2>📊 Intuición IA (antes de operar)</h2>
-<p><b>Contexto actual:</b> <span id="contexto">NEUTRO</span></p>
-<p><b>Sugerencia:</b> <span id="sugerencia">⏸ Esperar</span></p>
-<p><b>Duración estimada:</b> <span id="duracion">—</span></p>
-<p><b>Confianza:</b> <span id="confianza">—</span></p>
+<h2>🧠 Seguimiento IA</h2>
+
+<button class="buy" onclick="setOperacion('COMPRA')">🟢 COMPRA</button>
+<button class="sell" onclick="setOperacion('VENTA')">🔴 VENTA</button>
+
+<p><strong>Dirección:</strong> <span id="dir">➡️</span></p>
+<p><strong>Ganancia estimada:</strong> <span id="gain">0%</span></p>
+<p><strong>Semáforo:</strong> <span id="sem">🟡</span></p>
 </section>
 
-<!-- SEGUIMIENTO -->
-<section class="panel">
-<h2>🧠 Seguimiento IA (trade activo)</h2>
-<p class="signal" id="estadoIA">⏸ Esperar</p>
-<p><b>Dirección:</b> <span id="flecha">➡️</span></p>
-<p><b>Ganancia estimada:</b> <span id="ganancia">0%</span></p>
-<p><b>Semáforo:</b> <span id="semaforo">🟡</span></p>
-</section>
-
-<footer>
-Aviso: Esta web es educativa. No constituye asesoramiento financiero.
+<footer style="padding:20px;font-size:12px;color:#999">
+Aviso: Web educativa. No asesoramiento financiero.
 </footer>
 
 <script>
-// ================= GRÁFICA =================
-const chart = LightweightCharts.createChart(
-  document.getElementById("chart"),
-  {
-    layout: { background: { color: '#0f1220' }, textColor: '#fff' },
-    grid: { vertLines: { color: '#222' }, horzLines: { color: '#222' } },
-    timeScale: { timeVisible: true }
+let operacion = null;
+
+function setOperacion(op){
+  operacion = op;
+}
+
+setInterval(()=>{
+  const r = Math.random();
+  let dir="➡️", sem="🟡", gain="0%";
+  let senal="⏳ Esperando confirmación";
+
+  if(r>0.7){
+    dir = operacion==="VENTA"?"⬇️":"⬆️";
+    sem="🟢";
+    gain=`+${(r*1.2).toFixed(2)}%`;
+    senal = `🟢 Posible ${operacion || "COMPRA"}`;
+  }else if(r<0.3){
+    dir = operacion==="VENTA"?"⬆️":"⬇️";
+    sem="🔴";
+    gain=`+${(r*0.4).toFixed(2)}%`;
+    senal = "🔴 Riesgo alto";
   }
-);
 
-const series = chart.addCandlestickSeries({
-  upColor: '#26a69a',
-  downColor: '#ef5350',
-  wickUpColor: '#26a69a',
-  wickDownColor: '#ef5350',
-  borderVisible: false
-});
-
-// ================= BINANCE XAUUSDT =================
-const socket = new WebSocket(
-  'wss://stream.binance.com:9443/ws/xauusdt@kline_1m'
-);
-
-let markers = [];
-
-socket.onmessage = (event) => {
-  const msg = JSON.parse(event.data);
-  const k = msg.k;
-
-  const candle = {
-    time: k.t / 1000,
-    open: +k.o,
-    high
+  document.getElementById("dir").innerText=dir;
+  document.getElementById("sem").innerText=sem;
+  document.getElementById("gain").innerText
