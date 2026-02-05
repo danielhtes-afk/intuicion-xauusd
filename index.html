@@ -2,20 +2,25 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>IA Intuición XAUUSD</title>
+<title>IA de Intuición XAUUSD</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
 
 <style>
 body {
   margin: 0;
   font-family: Arial, sans-serif;
   background: #0f1220;
-  color: #ffffff;
+  color: #fff;
   text-align: center;
 }
-header { padding: 40px 20px; }
-section { padding: 20px; }
-
+header {
+  padding: 30px 20px;
+}
+section {
+  padding: 20px;
+}
 .panel {
   background: #161a2f;
   border-radius: 12px;
@@ -23,23 +28,13 @@ section { padding: 20px; }
   margin: 20px auto;
   padding: 20px;
 }
-
-button {
-  padding: 10px 16px;
-  margin: 5px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-.buy { background:#2e7d32; color:#fff; }
-.sell { background:#c62828; color:#fff; }
-.close { background:#444; color:#fff; }
-
 #chartContainer {
   position: relative;
-  max-width: 100%;
+  height: 480px;
 }
-
+#chart {
+  height: 100%;
+}
 #fullscreenBtn {
   position: absolute;
   top: 10px;
@@ -47,13 +42,19 @@ button {
   z-index: 10;
   background: #000;
   color: #fff;
-  font-size: 18px;
   border-radius: 6px;
+  border: none;
+  padding: 6px 10px;
+  font-size: 18px;
 }
-
-.signalBox {
-  font-size: 20px;
+.signal {
+  font-size: 22px;
   margin-top: 10px;
+}
+footer {
+  font-size: 12px;
+  color: #aaa;
+  padding: 20px;
 }
 </style>
 </head>
@@ -61,5 +62,74 @@ button {
 <body>
 
 <header>
-<h1>🤖 IA de Intuición XAUUSD</h1>
-<p>Copiloto inteligente para scalping en
+<h1>🤖 IA de Intuición para XAUUSD</h1>
+<p>
+Copiloto inteligente para scalping en oro.<br>
+Tú decides la entrada, la IA te ayuda a maximizar la salida.
+</p>
+</header>
+
+<!-- GRÁFICA -->
+<section>
+<div id="chartContainer">
+<button id="fullscreenBtn">⛶</button>
+<div id="chart"></div>
+</div>
+</section>
+
+<!-- IA ANTES DE OPERAR -->
+<section class="panel">
+<h2>📊 Intuición IA (antes de operar)</h2>
+<p><b>Contexto actual:</b> <span id="contexto">NEUTRO</span></p>
+<p><b>Sugerencia:</b> <span id="sugerencia">⏸ Esperar</span></p>
+<p><b>Duración estimada:</b> <span id="duracion">—</span></p>
+<p><b>Confianza:</b> <span id="confianza">—</span></p>
+</section>
+
+<!-- SEGUIMIENTO -->
+<section class="panel">
+<h2>🧠 Seguimiento IA (trade activo)</h2>
+<p class="signal" id="estadoIA">⏸ Esperar</p>
+<p><b>Dirección:</b> <span id="flecha">➡️</span></p>
+<p><b>Ganancia estimada:</b> <span id="ganancia">0%</span></p>
+<p><b>Semáforo:</b> <span id="semaforo">🟡</span></p>
+</section>
+
+<footer>
+Aviso: Esta web es educativa. No constituye asesoramiento financiero.
+</footer>
+
+<script>
+// ================= GRÁFICA =================
+const chart = LightweightCharts.createChart(
+  document.getElementById("chart"),
+  {
+    layout: { background: { color: '#0f1220' }, textColor: '#fff' },
+    grid: { vertLines: { color: '#222' }, horzLines: { color: '#222' } },
+    timeScale: { timeVisible: true }
+  }
+);
+
+const series = chart.addCandlestickSeries({
+  upColor: '#26a69a',
+  downColor: '#ef5350',
+  wickUpColor: '#26a69a',
+  wickDownColor: '#ef5350',
+  borderVisible: false
+});
+
+// ================= BINANCE XAUUSDT =================
+const socket = new WebSocket(
+  'wss://stream.binance.com:9443/ws/xauusdt@kline_1m'
+);
+
+let markers = [];
+
+socket.onmessage = (event) => {
+  const msg = JSON.parse(event.data);
+  const k = msg.k;
+
+  const candle = {
+    time: k.t / 1000,
+    open: +k.o,
+    high
