@@ -9,204 +9,176 @@
 <style>
 body{
   margin:0;
-  font-family:Arial, sans-serif;
   background:#0f1220;
+  font-family:Arial, sans-serif;
   color:#fff;
-}
-
-.dashboard{
-  display:grid;
-  grid-template-columns:380px 1fr;
-  grid-template-rows:auto auto;
-  gap:10px;
-  padding:10px;
-}
-
-.panel{
-  background:#151933;
-  border-radius:10px;
-  padding:12px;
-  box-shadow:0 0 10px rgba(0,0,0,.4);
 }
 
 h3{
   margin:0 0 8px 0;
   font-size:15px;
-  color:#4fc3f7;
 }
 
-.value{
-  font-size:14px;
-  margin:5px 0;
+.container{
+  display:grid;
+  grid-template-columns: 2fr 1fr;
+  grid-template-rows:auto auto;
+  gap:10px;
+  padding:10px;
 }
 
-.badge{
-  padding:3px 8px;
-  border-radius:6px;
-  font-size:12px;
+/* Gráfica */
+.chart{
+  grid-row:1 / span 2;
+  background:#0b0e1a;
+  border-radius:10px;
+  padding:5px;
 }
 
-.up{background:#2ecc71;}
-.down{background:#e74c3c;}
-.neutral{background:#7f8c8d;}
-
-#chart{
-  height:420px;
+/* Panel derecho */
+.panel{
+  display:grid;
+  grid-template-rows:auto auto auto auto auto;
+  gap:10px;
 }
 
-.bottom{
-  grid-column:1 / 3;
+.box{
+  background:#161a2e;
+  border-radius:10px;
+  padding:10px;
+  font-size:13px;
 }
 
 /* Semáforo */
 .semaforo{
-  width:60px;
-  height:60px;
-  border-radius:50%;
-  margin:10px auto;
-  background:#7f8c8d;
+  display:flex;
+  justify-content:space-between;
+  font-weight:bold;
 }
 
-.semaforo.verde{background:#2ecc71; box-shadow:0 0 20px #2ecc71;}
-.semaforo.amarillo{background:#f1c40f; box-shadow:0 0 20px #f1c40f;}
-.semaforo.rojo{background:#e74c3c; box-shadow:0 0 20px #e74c3c;}
+.buy{ color:#00ff99 }
+.sell{ color:#ff4d4d }
+.wait{ color:#ffd966 }
 
-select{
+/* Inputs */
+input{
+  width:100%;
+  padding:6px;
+  margin-top:5px;
+  border-radius:6px;
+  border:none;
   background:#0f1220;
   color:#fff;
-  border:1px solid #4fc3f7;
+}
+
+/* Chat */
+.chat{
+  height:120px;
+  overflow-y:auto;
+  background:#0f1220;
   border-radius:6px;
-  padding:4px;
+  padding:6px;
+  font-size:12px;
+}
+.chat-input{
+  margin-top:6px;
+}
+
+/* Botón */
+button{
+  width:100%;
+  margin-top:6px;
+  padding:6px;
+  border:none;
+  border-radius:6px;
+  background:#3b82f6;
+  color:#fff;
+  cursor:pointer;
 }
 </style>
 </head>
 
 <body>
 
-<div class="dashboard">
-
-  <!-- PANEL IA -->
-  <div class="panel">
-    <h3>🧠 Intuición de la IA</h3>
-
-    <div class="value">Dirección:
-      <span id="ia-direction" class="badge neutral">—</span>
-    </div>
-    <div class="value">Fuerza: <span id="ia-force">—</span></div>
-    <div class="value">Tiempo estimado: <span id="ia-time">—</span></div>
-    <div class="value">Sugerencia: <span id="ia-suggestion">Esperando mercado</span></div>
-
-    <h3 style="margin-top:12px;">🚦 Semáforo</h3>
-    <div id="semaforo" class="semaforo"></div>
-    <div class="value" id="semaforo-texto">Esperando confirmación</div>
-
-    <h3 style="margin-top:12px;">⏱ Multi-Timeframe</h3>
-    <div class="value">
-      Ejecución:
-      <select id="tf-select" onchange="actualizarIA()">
-        <option value="5">5m</option>
-        <option value="15">15m</option>
-        <option value="60">1h</option>
-      </select>
-    </div>
-
-    <div class="value">5m: <span id="tf-5" class="badge neutral">—</span></div>
-    <div class="value">15m: <span id="tf-15" class="badge neutral">—</span></div>
-    <div class="value">1h: <span id="tf-60" class="badge neutral">—</span></div>
-  </div>
+<div class="container">
 
   <!-- GRÁFICA -->
+  <div class="chart">
+    <div id="tvchart" style="height:100%;"></div>
+  </div>
+
+  <!-- PANEL DERECHO -->
   <div class="panel">
-    <div id="chart"></div>
-  </div>
 
-  <!-- COMPARATIVO -->
-  <div class="panel">
-    <h3>📊 Cuadro Comparativo</h3>
-    <div class="value">Sesgo IA: Multi-timeframe</div>
-    <div class="value">Regla: 1H manda · 15M confirma · 5M ejecuta</div>
-    <div class="value">Condición ideal: Alineación total</div>
-    <div class="value">Riesgo: Operar contra 1H</div>
-  </div>
+    <!-- INTUICIÓN IA -->
+    <div class="box">
+      <h3>🧠 Intuición IA</h3>
+      <div>Entrada sugerida: <b class="buy">COMPRA</b></div>
+      <div>Salida estimada: <b>+8 a +15 pips</b></div>
+      <div>Tiempo estimado: <b>5 – 15 min</b></div>
+      <div>Confianza: <b>Alta</b></div>
+    </div>
 
-  <!-- CONTROL -->
-  <div class="panel bottom">
-    <h3>🎯 Control de Operación</h3>
-    <div class="value">Estado: Esperando señal válida</div>
-    <div class="value">Disciplina > Impulso</div>
-  </div>
+    <!-- SEMÁFORO -->
+    <div class="box">
+      <h3>🚦 Semáforo de Mercado</h3>
+      <div class="semaforo">
+        <span class="buy">🟢 Comprar</span>
+        <span class="wait">🟡 Esperar</span>
+        <span class="sell">🔴 Vender</span>
+      </div>
+      <div style="margin-top:6px;">Estado actual: <b class="buy">Compra activa</b></div>
+    </div>
 
+    <!-- GESTIÓN -->
+    <div class="box">
+      <h3>💰 Gestión de Operación</h3>
+      <label>Apalancamiento</label>
+      <input type="number" placeholder="Ej: 100">
+
+      <label>Lotes</label>
+      <input type="number" placeholder="Ej: 0.10">
+
+      <label>Pips objetivo</label>
+      <input type="number" placeholder="Ej: 10">
+
+      <div style="margin-top:6px;">
+        Ganancia estimada: <b>$ 18.50</b>
+      </div>
+    </div>
+
+    <!-- CHAT IA -->
+    <div class="box">
+      <h3>💬 Chat IA</h3>
+      <div class="chat" id="chat">
+        IA: Mercado con presión alcista, espera confirmación.
+      </div>
+      <input class="chat-input" placeholder="Escribe a la IA...">
+      <button>Enviar</button>
+    </div>
+
+    <!-- ESTADO -->
+    <div class="box">
+      <h3>📌 Estado</h3>
+      <div>Operación activa: <b>SÍ</b></div>
+      <div>Sesión: <b>NY / Londres</b></div>
+      <div>Riesgo: <b>Controlado</b></div>
+    </div>
+
+  </div>
 </div>
 
 <script>
 new TradingView.widget({
-  container_id:"chart",
-  symbol:"XAUUSD",
+  autosize:true,
+  symbol:"OANDA:XAUUSD",
   interval:"5",
   timezone:"Etc/UTC",
   theme:"dark",
   style:"1",
   locale:"es",
-  toolbar_bg:"#151933",
-  autosize:true
+  container_id:"tvchart"
 });
-
-// -------- IA --------
-function analizarTF(){
-  const rsi = Math.random()*100;
-  const ema = (Math.random()*2)-1;
-  if(ema>0.3 && rsi>55) return "ALZA";
-  if(ema<-0.3 && rsi<45) return "BAJA";
-  return "NEUTRO";
-}
-
-function pintarBadge(id, estado){
-  const el=document.getElementById(id);
-  el.textContent=estado;
-  el.className="badge "+(estado==="ALZA"?"up":estado==="BAJA"?"down":"neutral");
-}
-
-function actualizarIA(){
-  const tf5=analizarTF();
-  const tf15=analizarTF();
-  const tf60=analizarTF();
-
-  pintarBadge("tf-5",tf5);
-  pintarBadge("tf-15",tf15);
-  pintarBadge("tf-60",tf60);
-
-  let direccion="ESPERAR", fuerza="Baja", tiempo="—",
-      sugerencia="Sin alineación",
-      sem="amarillo", semTxt="Esperar";
-
-  if(tf5===tf15 && tf15===tf60 && tf5!=="NEUTRO"){
-    direccion=tf5;
-    fuerza="Alta";
-    tiempo="15–30 min";
-    sugerencia="Alineación total – buscar entrada";
-    sem="verde";
-    semTxt="Condiciones óptimas";
-  }else if(tf60!=="NEUTRO" && tf5!==tf60){
-    direccion="RIESGO";
-    fuerza="Alta";
-    sugerencia="Contra tendencia mayor";
-    sem="rojo";
-    semTxt="NO operar";
-  }
-
-  document.getElementById("ia-direction").textContent=direccion;
-  document.getElementById("ia-direction").className="badge "+
-    (direccion==="ALZA"?"up":direccion==="BAJA"?"down":"neutral");
-  document.getElementById("ia-force").textContent=fuerza;
-  document.getElementById("ia-time").textContent=tiempo;
-  document.getElementById("ia-suggestion").textContent=sugerencia;
-
-  document.getElementById("semaforo").className="semaforo "+sem;
-  document.getElementById("semaforo-texto").textContent=semTxt;
-}
-
-setInterval(actualizarIA,12000);
-actualizarIA();
 </script>
 
 </body>
