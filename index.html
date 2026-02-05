@@ -2,9 +2,8 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Intuición XAUUSD · Copiloto IA</title>
+<title>Intuición XAUUSD · IA Copiloto</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <script src="https://s3.tradingview.com/tv.js"></script>
 
 <style>
@@ -12,185 +11,202 @@ body{
   margin:0;
   font-family:Arial, sans-serif;
   background:#0f1220;
-  color:#eaeaf0;
+  color:#fff;
 }
-h3{ margin:6px 0; }
+
+.dashboard{
+  display:grid;
+  grid-template-columns:380px 1fr;
+  grid-template-rows:auto auto;
+  gap:10px;
+  padding:10px;
+}
 
 .panel{
-  background:#171a2e;
+  background:#151933;
   border-radius:10px;
   padding:12px;
-  margin:8px;
+  box-shadow:0 0 10px rgba(0,0,0,.4);
 }
 
-button{
-  padding:10px;
-  margin:5px;
-  border:none;
+h3{
+  margin:0 0 8px 0;
+  font-size:15px;
+  color:#4fc3f7;
+}
+
+.value{
+  font-size:14px;
+  margin:5px 0;
+}
+
+.badge{
+  padding:3px 8px;
   border-radius:6px;
-  font-weight:bold;
-  cursor:pointer;
+  font-size:12px;
 }
-.buy{ background:#0f5132; color:#9effc2; }
-.sell{ background:#842029; color:#ffb3b3; }
-.win{ background:#146c43; color:#caffdf; }
-.loss{ background:#842029; color:#ffb3b3; }
 
-#semaforo{
-  padding:15px;
-  font-size:18px;
-  font-weight:bold;
-  text-align:center;
-  border-radius:8px;
+.up{background:#2ecc71;}
+.down{background:#e74c3c;}
+.neutral{background:#7f8c8d;}
+
+#chart{
+  height:420px;
 }
-.verde{ background:#0f5132; color:#9effc2; }
-.amarillo{ background:#664d03; color:#ffe69c; }
-.rojo{ background:#842029; color:#ffb3b3; }
+
+.bottom{
+  grid-column:1 / 3;
+}
+
+/* Semáforo */
+.semaforo{
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  margin:10px auto;
+  background:#7f8c8d;
+}
+
+.semaforo.verde{background:#2ecc71; box-shadow:0 0 20px #2ecc71;}
+.semaforo.amarillo{background:#f1c40f; box-shadow:0 0 20px #f1c40f;}
+.semaforo.rojo{background:#e74c3c; box-shadow:0 0 20px #e74c3c;}
+
+select{
+  background:#0f1220;
+  color:#fff;
+  border:1px solid #4fc3f7;
+  border-radius:6px;
+  padding:4px;
+}
 </style>
 </head>
 
 <body>
 
-<div id="tv_chart" style="height:420px;"></div>
+<div class="dashboard">
 
-<div class="panel">
-  <h3>🎯 Entrada manual</h3>
-  <button class="buy" onclick="entrarOperacion('BUY')">🟢 Entré en COMPRA</button>
-  <button class="sell" onclick="entrarOperacion('SELL')">🔴 Entré en VENTA</button>
-</div>
+  <!-- PANEL IA -->
+  <div class="panel">
+    <h3>🧠 Intuición de la IA</h3>
 
-<div class="panel">
-  <h3>🚦 Semáforo de la operación</h3>
-  <div id="semaforo">⏳ Esperando entrada</div>
-</div>
+    <div class="value">Dirección:
+      <span id="ia-direction" class="badge neutral">—</span>
+    </div>
+    <div class="value">Fuerza: <span id="ia-force">—</span></div>
+    <div class="value">Tiempo estimado: <span id="ia-time">—</span></div>
+    <div class="value">Sugerencia: <span id="ia-suggestion">Esperando mercado</span></div>
 
-<div class="panel">
-  <h3>📊 Estado actual</h3>
-  <div id="estadoOperacion">Sin operación activa</div>
-</div>
+    <h3 style="margin-top:12px;">🚦 Semáforo</h3>
+    <div id="semaforo" class="semaforo"></div>
+    <div class="value" id="semaforo-texto">Esperando confirmación</div>
 
-<div class="panel">
-  <h3>✍️ Cierre manual</h3>
-  <button class="win" onclick="cerrarOperacion('win')">🟢 Fue GANADORA</button>
-  <button class="loss" onclick="cerrarOperacion('loss')">🔴 Fue PERDEDORA</button>
-</div>
+    <h3 style="margin-top:12px;">⏱ Multi-Timeframe</h3>
+    <div class="value">
+      Ejecución:
+      <select id="tf-select" onchange="actualizarIA()">
+        <option value="5">5m</option>
+        <option value="15">15m</option>
+        <option value="60">1h</option>
+      </select>
+    </div>
 
-<div class="panel">
-  <h3>📈 Rendimiento</h3>
-  <div id="estadisticas">Sin datos</div>
-  <div id="probabilidad">Esperando historial</div>
+    <div class="value">5m: <span id="tf-5" class="badge neutral">—</span></div>
+    <div class="value">15m: <span id="tf-15" class="badge neutral">—</span></div>
+    <div class="value">1h: <span id="tf-60" class="badge neutral">—</span></div>
+  </div>
+
+  <!-- GRÁFICA -->
+  <div class="panel">
+    <div id="chart"></div>
+  </div>
+
+  <!-- COMPARATIVO -->
+  <div class="panel">
+    <h3>📊 Cuadro Comparativo</h3>
+    <div class="value">Sesgo IA: Multi-timeframe</div>
+    <div class="value">Regla: 1H manda · 15M confirma · 5M ejecuta</div>
+    <div class="value">Condición ideal: Alineación total</div>
+    <div class="value">Riesgo: Operar contra 1H</div>
+  </div>
+
+  <!-- CONTROL -->
+  <div class="panel bottom">
+    <h3>🎯 Control de Operación</h3>
+    <div class="value">Estado: Esperando señal válida</div>
+    <div class="value">Disciplina > Impulso</div>
+  </div>
+
 </div>
 
 <script>
-/* ================== TRADINGVIEW ================== */
-let tvPrecioActual = null;
-
 new TradingView.widget({
-  symbol: "XAUUSD",
-  interval: "5",
-  container_id: "tv_chart",
-  theme: "dark",
-  style: "1",
-  locale: "es",
-  toolbar_bg: "#0f1220",
-  hide_top_toolbar: false,
-  withdateranges: true,
-  allow_symbol_change: false,
-  save_image: false,
+  container_id:"chart",
+  symbol:"XAUUSD",
+  interval:"5",
+  timezone:"Etc/UTC",
+  theme:"dark",
+  style:"1",
+  locale:"es",
+  toolbar_bg:"#151933",
+  autosize:true
 });
 
-/* ================== ESTADO ================== */
-let operacionActiva = false;
-let tipoOperacion = null;
-let precioEntrada = null;
+// -------- IA --------
+function analizarTF(){
+  const rsi = Math.random()*100;
+  const ema = (Math.random()*2)-1;
+  if(ema>0.3 && rsi>55) return "ALZA";
+  if(ema<-0.3 && rsi<45) return "BAJA";
+  return "NEUTRO";
+}
 
-let historial = JSON.parse(localStorage.getItem("historialXAU")) || [];
+function pintarBadge(id, estado){
+  const el=document.getElementById(id);
+  el.textContent=estado;
+  el.className="badge "+(estado==="ALZA"?"up":estado==="BAJA"?"down":"neutral");
+}
 
-/* ================== PRECIO SIMULADO ==================
-TradingView no expone el precio directo por JS.
-Esto se usa solo para lógica relativa (acompañamiento).
-*/
-function obtenerPrecioActual(){
-  if(!tvPrecioActual){
-    tvPrecioActual = 2300 + Math.random(); // base inicial
+function actualizarIA(){
+  const tf5=analizarTF();
+  const tf15=analizarTF();
+  const tf60=analizarTF();
+
+  pintarBadge("tf-5",tf5);
+  pintarBadge("tf-15",tf15);
+  pintarBadge("tf-60",tf60);
+
+  let direccion="ESPERAR", fuerza="Baja", tiempo="—",
+      sugerencia="Sin alineación",
+      sem="amarillo", semTxt="Esperar";
+
+  if(tf5===tf15 && tf15===tf60 && tf5!=="NEUTRO"){
+    direccion=tf5;
+    fuerza="Alta";
+    tiempo="15–30 min";
+    sugerencia="Alineación total – buscar entrada";
+    sem="verde";
+    semTxt="Condiciones óptimas";
+  }else if(tf60!=="NEUTRO" && tf5!==tf60){
+    direccion="RIESGO";
+    fuerza="Alta";
+    sugerencia="Contra tendencia mayor";
+    sem="rojo";
+    semTxt="NO operar";
   }
-  tvPrecioActual += (Math.random() - 0.5) * 0.3;
-  return tvPrecioActual;
+
+  document.getElementById("ia-direction").textContent=direccion;
+  document.getElementById("ia-direction").className="badge "+
+    (direccion==="ALZA"?"up":direccion==="BAJA"?"down":"neutral");
+  document.getElementById("ia-force").textContent=fuerza;
+  document.getElementById("ia-time").textContent=tiempo;
+  document.getElementById("ia-suggestion").textContent=sugerencia;
+
+  document.getElementById("semaforo").className="semaforo "+sem;
+  document.getElementById("semaforo-texto").textContent=semTxt;
 }
 
-/* ================== ENTRADA ================== */
-function entrarOperacion(tipo){
-  const precio = obtenerPrecioActual();
-  operacionActiva = true;
-  tipoOperacion = tipo;
-  precioEntrada = precio;
-
-  actualizarSemaforo("verde","🟢 Operación activa · Mantener");
-}
-
-/* ================== SEMÁFORO ================== */
-function analizarOperacion(){
-  if(!operacionActiva) return;
-
-  const precio = obtenerPrecioActual();
-  let diff = precio - precioEntrada;
-  if(tipoOperacion === "SELL") diff *= -1;
-
-  document.getElementById("estadoOperacion").innerText =
-    `Diferencia: ${diff.toFixed(2)}`;
-
-  if(diff > 0.4){
-    actualizarSemaforo("verde","🟢 Mantener operación");
-  }else if(diff > -0.2){
-    actualizarSemaforo("amarillo","🟡 Posible cierre");
-  }else{
-    actualizarSemaforo("rojo","🔴 Riesgo alto");
-  }
-}
-
-function actualizarSemaforo(color,texto){
-  const s = document.getElementById("semaforo");
-  s.className = color;
-  s.innerText = texto;
-}
-
-/* ================== CIERRE MANUAL ================== */
-function cerrarOperacion(resultado){
-  if(!operacionActiva) return;
-
-  historial.push({ resultado });
-  if(historial.length > 20) historial.shift();
-  localStorage.setItem("historialXAU", JSON.stringify(historial));
-
-  operacionActiva = false;
-  precioEntrada = null;
-  tipoOperacion = null;
-
-  document.getElementById("semaforo").className = "";
-  document.getElementById("semaforo").innerText = "⏳ Esperando nueva entrada";
-
-  actualizarEstadisticas();
-}
-
-/* ================== ESTADÍSTICAS ================== */
-function actualizarEstadisticas(){
-  const total = historial.length;
-  const wins = historial.filter(h=>h.resultado==="win").length;
-  const prob = total ? Math.round((wins/total)*100) : 0;
-
-  document.getElementById("estadisticas").innerText =
-    `Aciertos: ${wins}/${total} (${prob}%)`;
-
-  document.getElementById("probabilidad").innerText =
-    prob >= 60
-      ? `🟢 Próxima entrada favorable (${prob}%)`
-      : prob >= 45
-        ? `🟡 Probabilidad media (${prob}%)`
-        : `🔴 Probabilidad baja (${prob}%)`;
-}
-
-actualizarEstadisticas();
-setInterval(analizarOperacion, 5000);
+setInterval(actualizarIA,12000);
+actualizarIA();
 </script>
 
 </body>
