@@ -82,6 +82,69 @@
   </div>
 </section>
 
+  <!-- CUADRO 1: ANÁLISIS AUTOMÁTICO -->
+<div id="analisis-ia" style="margin-top:25px; padding:15px; border:1px solid #ccc;">
+
+  <h3>📊 Análisis automático IA (XAUUSD)</h3>
+
+  <p><strong>Contexto IA:</strong> <span id="contexto"></span></p>
+  <p><strong>Dirección sugerida:</strong> <span id="direccion"></span></p>
+  <p><strong>Lote fijo:</strong> 0.10</p>
+  <p><strong>Apalancamiento:</strong> 1:1400</p>
+  <p><strong>Movimiento analizado:</strong> 1 pip</p>
+
+  <p><strong>Ganancia estimada:</strong> <span id="ganancia"></span></p>
+  <p><strong>Pérdida estimada:</strong> <span id="perdida"></span></p>
+
+</div>
+
+<!-- CUADRO 2: CONSEJO IA -->
+<div id="consejo-ia" style="margin-top:15px; padding:15px; border:1px solid #aaa; background:#f9f9f9;">
+  <h3>🧠 Consejo contextual IA</h3>
+  <p id="texto-ia"></p>
+</div>
+
+<script>
+  // ==========================
+  // CONFIGURACIÓN FIJA
+  // ==========================
+  const lote = 0.10;
+  const valorPip = 10; // USD por pip en 0.10 lotes
+  const movimiento = 1; // 1 pip
+
+  // CONTEXTO IA (simulado por ahora)
+  // Opciones: favorable | neutro | desfavorable
+  const contextoIA = "favorable";
+
+  let direccion = "";
+  let textoIA = "";
+
+  if (contextoIA === "favorable") {
+    direccion = "📈 Compra";
+    textoIA =
+      "El contexto del mercado es favorable y muestra una estructura estable. Una posible compra podría considerarse si el precio confirma continuidad. La pérdida por un movimiento adverso de 1 pip forma parte del riesgo asumido.";
+  } 
+  else if (contextoIA === "desfavorable") {
+    direccion = "📉 Venta";
+    textoIA =
+      "El mercado presenta presión bajista. Una posible venta podría evaluarse si el precio mantiene debilidad. Es importante considerar la pérdida potencial ante un posible retroceso.";
+  } 
+  else {
+    direccion = "⏸ Esperar";
+    textoIA =
+      "El mercado se encuentra en un contexto neutro, sin una ventaja clara. Esperar confirmación puede ser la decisión más prudente antes de tomar una posición.";
+  }
+
+  const ganancia = valorPip * movimiento;
+  const perdida = valorPip * movimiento;
+
+  // MOSTRAR RESULTADOS
+  document.getElementById("contexto").innerText = contextoIA.toUpperCase();
+  document.getElementById("direccion").innerText = direccion;
+  document.getElementById("ganancia").innerText = `+${ganancia} USD`;
+  document.getElementById("perdida").innerText = `-${perdida} USD`;
+  document.getElementById("texto-ia").innerText = textoIA;
+</script>
 <section id="ia-panel">
   <h2>Análisis contextual IA</h2>
   <p class="status">
