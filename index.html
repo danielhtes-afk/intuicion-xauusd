@@ -2,10 +2,161 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>TEST OK</title>
+<title>IA Intuición XAUUSD</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#0f1220;
+  color:#fff;
+  text-align:center;
+}
+header { padding:30px; }
+.panel {
+  background:#161a2f;
+  border-radius:12px;
+  max-width:900px;
+  margin:20px auto;
+  padding:20px;
+}
+button {
+  padding:10px 16px;
+  margin:5px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+.buy { background:#2e7d32; color:#fff; }
+.sell { background:#c62828; color:#fff; }
+.close { background:#444; color:#fff; }
+.control {
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:10px;
+  margin:10px 0;
+}
+.control button {
+  width:36px;
+  height:36px;
+  font-size:18px;
+}
+select {
+  padding:8px;
+  border-radius:6px;
+  border:none;
+}
+.signalOverlay {
+  margin-top:10px;
+  font-size:18px;
+  font-weight:bold;
+}
+</style>
 </head>
+
 <body>
-<h1>✅ Página cargando correctamente</h1>
-<p>GitHub Pages funciona.</p>
+
+<header>
+<h1>🤖 IA Intuición XAUUSD</h1>
+<p>Scalping inteligente con cálculo automático</p>
+</header>
+
+<section class="panel">
+<h2>📈 Gráfica</h2>
+<div style="width:100%;height:500px;border-radius:12px;overflow:hidden;">
+<iframe
+  src="https://www.tradingview.com/widgetembed/?symbol=OANDA:XAUUSD&interval=1&theme=dark&style=1&locale=es"
+  style="width:100%;height:100%;border:none;">
+</iframe>
+</div>
+<div class="signalOverlay" id="senal">🟡 IA esperando señal</div>
+</section>
+
+<section class="panel">
+<h2>⚙️ Configuración de Trade</h2>
+
+<div class="control">
+  <span>Pip objetivo</span>
+  <button onclick="pip -= 0.01; actualizar()">−</button>
+  <strong id="pipVal">0.01</strong>
+  <button onclick="pip += 0.01; actualizar()">+</button>
+</div>
+
+<div class="control">
+  <span>Volumen</span>
+  <button onclick="volumen--">−</button>
+  <strong id="volVal">1</strong>
+  <button onclick="volumen++">+</button>
+</div>
+
+<div class="control">
+  <span>Apalancamiento</span>
+  <select id="apal" onchange="actualizar()">
+    <option value="2">1:2</option>
+    <option value="20">1:20</option>
+    <option value="50">1:50</option>
+    <option value="100">1:100</option>
+    <option value="200">1:200</option>
+    <option value="400" selected>1:400</option>
+    <option value="500">1:500</option>
+    <option value="800">1:800</option>
+    <option value="1000">1:1000</option>
+    <option value="2000">1:2000</option>
+  </select>
+</div>
+
+<p><strong>Ganancia estimada:</strong>
+<span id="usd">$0.00</span></p>
+
+<p><strong>Tiempo estimado:</strong>
+<span id="tiempo">—</span></p>
+</section>
+
+<section class="panel">
+<h2>🧠 Control IA</h2>
+<button class="buy" onclick="trade('COMPRA')">🟢 COMPRA</button>
+<button class="sell" onclick="trade('VENTA')">🔴 VENTA</button>
+<button class="close" onclick="cerrar()">⏹ Finalizar</button>
+<p id="msg"></p>
+</section>
+
+<script>
+let pip = 0.01;
+let volumen = 1;
+
+function actualizar() {
+  if (pip < 0.01) pip = 0.01;
+  if (volumen < 1) volumen = 1;
+
+  document.getElementById("pipVal").innerText = pip.toFixed(2);
+  document.getElementById("volVal").innerText = volumen;
+
+  const apal = Number(document.getElementById("apal").value);
+  const usd = pip * volumen * apal * 10;
+
+  document.getElementById("usd").innerText = `$${usd.toFixed(2)}`;
+  document.getElementById("tiempo").innerText =
+    pip <= 0.03 ? "2–5 min" :
+    pip <= 0.06 ? "5–10 min" :
+    "10–20 min";
+}
+
+function trade(tipo) {
+  document.getElementById("senal").innerText =
+    tipo === "COMPRA" ? "🟢 IA acompaña COMPRA" : "🔴 IA acompaña VENTA";
+  document.getElementById("msg").innerText =
+    `Trade ${tipo} activo. IA calcula salida óptima.`;
+}
+
+function cerrar() {
+  document.getElementById("senal").innerText = "🟡 IA esperando señal";
+  document.getElementById("msg").innerText = "Trade finalizado.";
+}
+
+actualizar();
+</script>
+
 </body>
 </html>
