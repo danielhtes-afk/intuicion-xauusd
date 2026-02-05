@@ -2,63 +2,129 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Intuición XAUUSD · IA Aprendizaje</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Intuición XAUUSD</title>
+
+<!-- TradingView -->
+<script src="https://s3.tradingview.com/tv.js"></script>
 
 <style>
 body{
   margin:0;
   font-family:Arial, sans-serif;
-  background:#0f1220;
+  background:#0b1020;
   color:#fff;
 }
+
 .container{
-  max-width:900px;
+  max-width:430px;
   margin:auto;
-  padding:15px;
+  padding:10px;
 }
+
+/* ===== GRAFICA ===== */
+#chart{
+  height:260px;
+  border-radius:14px;
+  overflow:hidden;
+  margin-bottom:12px;
+}
+
+/* ===== TARJETAS ===== */
 .card{
-  background:#151a30;
+  background:linear-gradient(180deg,#121a33,#0b1020);
+  border-radius:16px;
+  padding:16px;
+  margin-bottom:16px;
+  box-shadow:0 10px 25px rgba(0,0,0,.45);
+}
+
+.title{
+  text-align:center;
+  font-size:20px;
+  font-weight:bold;
+  margin-bottom:12px;
+  color:#2de2ff;
+}
+
+/* ===== BOTONES ===== */
+.btn{
+  width:100%;
+  border:none;
   border-radius:12px;
-  padding:15px;
-  margin-bottom:15px;
-}
-h2,h3{
-  margin:0 0 10px 0;
-}
-.flex{
-  display:flex;
-  justify-content:space-between;
-  gap:10px;
-}
-.col{
-  flex:1;
-  background:#1c2240;
-  padding:10px;
-  border-radius:10px;
-}
-.big{
-  font-size:26px;
+  padding:14px;
+  font-size:18px;
   font-weight:bold;
-}
-.green{color:#4cff9b;}
-.red{color:#ff5c5c;}
-.gray{color:#aaa;}
-button{
-  padding:10px;
-  border:none;
-  border-radius:8px;
+  margin-bottom:10px;
   cursor:pointer;
+}
+
+.buy{ background:#00c853; color:#000; }
+.sell{ background:#ff5252; color:#000; }
+.close{ background:#ffd600; color:#000; }
+
+.good{ background:#00e676; color:#000; }
+.bad{ background:#ff1744; color:#fff; }
+
+/* ===== ESTADO ===== */
+.status{
+  margin-top:10px;
+  font-size:14px;
+  opacity:.85;
+}
+
+/* ===== DOTS ===== */
+.dot-bar{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  margin:12px 0;
+}
+.dot{
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  background:#444;
+}
+
+/* ===== IA ===== */
+.ia-line{
+  margin:8px 0;
+  font-size:16px;
+}
+.highlight{
+  color:#2de2ff;
   font-weight:bold;
 }
-.btn-ok{background:#4cff9b;}
-.btn-no{background:#ff5c5c;}
-select{
-  background:#1c2240;
-  color:#fff;
-  border:none;
-  padding:6px;
-  border-radius:6px;
+
+/* ===== COMPARATIVA ===== */
+.ia-compare{
+  display:flex;
+  gap:10px;
+  margin-top:12px;
+}
+
+.side{
+  flex:1;
+  padding:10px;
+  border-radius:12px;
+  font-size:14px;
+}
+
+.bull{
+  background:rgba(0,255,150,.12);
+  border:1px solid rgba(0,255,150,.35);
+}
+
+.bear{
+  background:rgba(255,60,60,.12);
+  border:1px solid rgba(255,60,60,.35);
+}
+
+.side-title{
+  font-weight:bold;
+  margin-bottom:6px;
+  text-align:center;
 }
 </style>
 </head>
@@ -66,125 +132,121 @@ select{
 <body>
 <div class="container">
 
+  <!-- GRAFICA -->
+  <div id="chart"></div>
+
+  <!-- CONTROL -->
   <div class="card">
-    <h2>🧠 Intuición IA · XAUUSD</h2>
-    Temporalidad:
-    <select onchange="cambiarTF(this.value)">
-      <option value="1m">1 Minuto</option>
-      <option value="5m" selected>5 Minutos</option>
-      <option value="15m">15 Minutos</option>
-    </select>
+    <div class="title">🧠 Control de Operación</div>
+
+    <button class="btn buy" onclick="entrar('COMPRA')">Entré en COMPRA</button>
+    <button class="btn sell" onclick="entrar('VENTA')">Entré en VENTA</button>
+    <button class="btn close" onclick="cerrar()">Cerré Operación</button>
+
+    <div class="dot-bar">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+
+    <button class="btn good" onclick="resultado('POSITIVO')">Resultado POSITIVO</button>
+    <button class="btn bad" onclick="resultado('NEGATIVO')">Resultado NEGATIVO</button>
+
+    <div class="status" id="estado">Estado: esperando entrada...</div>
   </div>
 
+  <!-- INTUICION IA -->
   <div class="card">
-    <h3>📊 Comparativo de Probabilidad</h3>
+    <div class="title">📊 Intuición IA</div>
 
-    <div class="flex">
-      <div class="col">
-        <h4>🔼 ALZA (Compra)</h4>
-        <div id="probBuy" class="big green">--%</div>
-        <div id="estrBuy" class="gray">Estructura: --</div>
-        <div id="timeBuy" class="gray">Tiempo: --</div>
+    <div class="ia-line">Dirección: <span class="highlight" id="dir">ALCISTA 📈</span></div>
+    <div class="ia-line">Fuerza: <span class="highlight" id="fuerza">77%</span></div>
+    <div class="ia-line">Tiempo estimado: <span class="highlight" id="tiempo">8 min</span></div>
+    <div class="ia-line">Sugerencia: <span class="highlight" id="sug">Mantener COMPRA</span></div>
+
+    <hr style="opacity:.2;margin:14px 0">
+
+    <!-- COMPARATIVA -->
+    <div class="ia-compare">
+      <div class="side bull">
+        <div class="side-title">ALCISTA 📈</div>
+        <div>Probabilidad: <b id="bullProb">72%</b></div>
+        <div>Duración: <b id="bullTime">9 min</b></div>
+        <div>Fuerza: <b id="bullPower">Fuerte</b></div>
       </div>
 
-      <div class="col">
-        <h4>🔽 BAJA (Venta)</h4>
-        <div id="probSell" class="big red">--%</div>
-        <div id="estrSell" class="gray">Estructura: --</div>
-        <div id="timeSell" class="gray">Tiempo: --</div>
+      <div class="side bear">
+        <div class="side-title">BAJISTA 📉</div>
+        <div>Probabilidad: <b id="bearProb">28%</b></div>
+        <div>Duración: <b id="bearTime">4 min</b></div>
+        <div>Fuerza: <b id="bearPower">Débil</b></div>
       </div>
     </div>
-  </div>
-
-  <div class="card">
-    <h3>🤖 Decisión IA</h3>
-    <div id="decision" class="big gray">Analizando mercado...</div>
-  </div>
-
-  <div class="card">
-    <h3>📌 Resultado de la Operación</h3>
-    <button class="btn-ok" onclick="guardarResultado(true)">✅ Resultado Positivo</button>
-    <button class="btn-no" onclick="guardarResultado(false)">❌ Resultado Negativo</button>
   </div>
 
 </div>
 
 <script>
-/* ===== CONFIG ===== */
-let timeframe = "5m";
-let ultimaDireccion = null;
-const KEY = "IA_XAUUSD";
+/* ===== TRADINGVIEW ===== */
+new TradingView.widget({
+  autosize:true,
+  symbol:"OANDA:XAUUSD",
+  interval:"5",
+  timezone:"Etc/UTC",
+  theme:"dark",
+  style:"1",
+  locale:"es",
+  container_id:"chart"
+});
 
-/* ===== INIT ===== */
-function initIA(){
-  if(!localStorage.getItem(KEY)){
-    localStorage.setItem(KEY, JSON.stringify({
-      "1m":{wB:0,lB:0,wS:0,lS:0},
-      "5m":{wB:0,lB:0,wS:0,lS:0},
-      "15m":{wB:0,lB:0,wS:0,lS:0}
-    }));
+/* ===== CONTROL ===== */
+let operacion=null;
+
+function entrar(tipo){
+  operacion=tipo;
+  document.getElementById("estado").innerText =
+    "Estado: operación abierta en "+tipo;
+}
+
+function cerrar(){
+  if(!operacion){
+    alert("No hay operación activa");
+    return;
   }
-}
-initIA();
-
-/* ===== TIMEFRAME ===== */
-function cambiarTF(tf){
-  timeframe = tf;
-  calcular();
+  document.getElementById("estado").innerText =
+    "Estado: operación cerrada ("+operacion+")";
+  operacion=null;
 }
 
-/* ===== CALCULO ===== */
-function calcular(){
-  const data = JSON.parse(localStorage.getItem(KEY))[timeframe];
+function resultado(res){
+  document.getElementById("estado").innerText =
+    "Resultado: "+res;
+}
 
-  let totalBuy = data.wB + data.lB;
-  let totalSell = data.wS + data.lS;
+/* ===== INTUICION IA (SIMULADA, LISTA PARA API) ===== */
+setInterval(()=>{
+  const bull=Math.floor(55+Math.random()*30);
+  const bear=100-bull;
 
-  let probBuy = totalBuy ? Math.round((data.wB/totalBuy)*100) : 50;
-  let probSell = totalSell ? Math.round((data.wS/totalSell)*100) : 50;
+  document.getElementById("bullProb").innerText=bull+"%";
+  document.getElementById("bearProb").innerText=bear+"%";
 
-  let sum = probBuy + probSell;
-  probBuy = Math.round((probBuy/sum)*100);
-  probSell = 100 - probBuy;
+  document.getElementById("bullTime").innerText=
+    Math.floor(6+Math.random()*6)+" min";
+  document.getElementById("bearTime").innerText=
+    Math.floor(3+Math.random()*5)+" min";
 
-  document.getElementById("probBuy").innerText = probBuy+"%";
-  document.getElementById("probSell").innerText = probSell+"%";
+  document.getElementById("fuerza").innerText=bull+"%";
 
-  document.getElementById("estrBuy").innerText =
-    "Estructura: "+(probBuy>probSell?"Alcista":"Débil");
-  document.getElementById("estrSell").innerText =
-    "Estructura: "+(probSell>probBuy?"Bajista":"Débil");
-
-  let tiempo =
-    timeframe==="1m" ? "3–7 min (máx 12)" :
-    timeframe==="5m" ? "15–30 min (máx 45)" :
-    "30–90 min (máx 2h)";
-
-  document.getElementById("timeBuy").innerText = "Tiempo: "+tiempo;
-  document.getElementById("timeSell").innerText = "Tiempo: "+tiempo;
-
-  let dec = "Esperar confirmación";
-  ultimaDireccion = null;
-
-  if(Math.abs(probBuy-probSell)>=25){
-    if(probBuy>probSell){
-      dec = "✅ COMPRA · Confianza "+probBuy+"% · Tómalo o déjalo";
-      ultimaDireccion="buy";
-    }else{
-      dec = "✅ VENTA · Confianza "+probSell+"% · Tómalo o déjalo";
-      ultimaDireccion="sell";
-    }
+  if(bull>bear){
+    document.getElementById("dir").innerText="ALCISTA 📈";
+    document.getElementById("sug").innerText="Mantener COMPRA";
+  }else{
+    document.getElementById("dir").innerText="BAJISTA 📉";
+    document.getElementById("sug").innerText="Mantener VENTA";
   }
+},6000);
+</script>
 
-  document.getElementById("decision").innerText = dec;
-}
-
-/* ===== APRENDIZAJE ===== */
-function guardarResultado(ok){
-  if(!ultimaDireccion) return alert("No había señal clara");
-
-  const all = JSON.parse(localStorage.getItem(KEY));
-  const tf = all[timeframe];
-
-  if(ultimaDireccion==="buy"){
-    ok ?
+</body>
+</html>
