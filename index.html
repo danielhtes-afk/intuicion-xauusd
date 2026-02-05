@@ -19,9 +19,7 @@ header{
   font-size:20px;
   font-weight:bold;
 }
-.container{
-  padding:10px;
-}
+.container{padding:10px;}
 .card{
   background:#161a33;
   border-radius:10px;
@@ -38,7 +36,7 @@ h3{color:#7dd3fc;margin:6px 0;}
 .buy{background:#14532d;color:#4ade80;}
 .sell{background:#7f1d1d;color:#f87171;}
 .wait{background:#1f2933;color:#facc15;}
-button,input,textarea{
+button,textarea{
   width:100%;
   margin-top:6px;
   padding:8px;
@@ -51,7 +49,7 @@ button{
   font-weight:bold;
 }
 .chat-box{
-  height:220px;
+  height:200px;
   overflow-y:auto;
   background:#0b0e1a;
   padding:6px;
@@ -85,18 +83,18 @@ new TradingView.widget({
 </script>
 </div>
 
-<!-- SEMÁFORO -->
+<!-- SEMÁFORO + INTUICIÓN -->
 <div class="card">
-<h3>🚦 Semáforo IA</h3>
-<div id="signal" class="signal wait">ESPERANDO DATOS...</div>
+<h3>🚦 Señal técnica</h3>
+<div id="signal" class="signal wait">Esperando datos…</div>
 
-<div id="tiempoEntrada">⏱️ Tiempo óptimo entrada: —</div>
+<div id="tiempoEntrada">⏱️ Intuición: —</div>
 <div id="contadorBox">⏳ Entrada en: <span id="contador">—</span></div>
 </div>
 
 <!-- AVISAR ENTRADA -->
 <div class="card">
-<h3>🧑‍💻 Avisar a la IA</h3>
+<h3>🧑‍💻 Gestión</h3>
 <button onclick="entrar()">✅ Ya entré al mercado</button>
 <div id="estadoTrade">Sin trade activo</div>
 <div id="tiempoSalida">⏱️ Tiempo óptimo de cierre: —</div>
@@ -113,74 +111,122 @@ new TradingView.widget({
 </div>
 
 <script>
-const API_KEY="d3cd94ff08974ed893ad7f77c1cd3b87";
-const SYMBOL="XAUUSD";
+// ================= CONFIG =================
+const API_KEY = "d3cd94ff08974ed893ad7f77c1cd3b87";
+const SYMBOL = "XAUUSD";
 
-let contadorInterval=null;
-let tiempoRestante=0;
-let tradeActivo=false;
+// ================= ESTADO =================
+let precioAnterior = null;
+let señalTecnica = null;
+let tradeActivo = false;
+let contadorInterval = null;
+let tiempoRestante = 0;
 
-// CHAT
+// ================= CHAT =================
 function addMsg(t,c){
-  chat.innerHTML+=`<div class="chat-msg ${c}">${t}</div>`;
-  chat.scrollTop=chat.scrollHeight;
+  chat.innerHTML += `<div class="chat-msg ${c}">${t}</div>`;
+  chat.scrollTop = chat.scrollHeight;
 }
 function enviar(){
   if(!msg.value) return;
-  addMsg("🧑‍💻 "+msg.value,"user");
+  addMsg("🧑‍💻 " + msg.value,"user");
   msg.value="";
-  setTimeout(()=>addMsg("🤖 IA: Mantén disciplina.","ia"),600);
+  setTimeout(()=>{
+    addMsg("🤖 IA: Observa la estructura, no anticipes.","ia");
+  },600);
 }
 
-// CONTADOR
+// ================= CONTADOR =================
 function iniciarContador(min){
   clearInterval(contadorInterval);
-  tiempoRestante=min*60;
-  contadorInterval=setInterval(()=>{
+  tiempoRestante = min * 60;
+  contadorInterval = setInterval(()=>{
     tiempoRestante--;
-    contador.innerText=
-      Math.floor(tiempoRestante/60)+":"+
+    contador.innerText =
+      Math.floor(tiempoRestante/60) + ":" +
       (tiempoRestante%60).toString().padStart(2,"0");
-    if(tiempoRestante<=0){
+
+    if(tiempoRestante <= 0){
       clearInterval(contadorInterval);
-      contador.innerText="ENTRAR AHORA";
+      contador.innerText = "ENTRAR AHORA";
     }
   },1000);
 }
 
-// IA ENTRADA
+// ================= ANALISIS TECNICO (API) =================
+function analizarTecnico(price, prev){
+  const cambio = price - prev;
+
+  if(cambio > 0.6) return "buy";
+  if(cambio < -0.6) return "sell";
+
+  return null;
+}
+
+// ================= INTUICIÓN (TIMING) =================
 function analizar(price){
-  const s=document.getElementById("signal");
-  if(price%2>1){
-    s.className="signal buy";
-    s.innerText="🟢 COMPRA";
-    tiempoEntrada.innerText="⏱️ Esperar 2 min";
-    iniciarContador(2);
-  }else if(price%2<0.5){
-    s.className="signal sell";
-    s.innerText="🔴 VENTA";
-    tiempoEntrada.innerText="⏱️ Esperar 3 min";
+  if(precioAnterior === null){
+    precioAnterior = price;
+    return;
+  }
+
+  const nuevaSeñal = analizarTecnico(price, precioAnterior);
+
+  // NUEVA SEÑAL DETECTADA
+  if(nuevaSeñal && nuevaSeñal !== señalTecnica){
+    señalTecnica = nuevaSeñal;
+
+    signal.className =
+      nuevaSeñal === "buy" ? "signal buy" : "signal sell";
+    signal.innerText =
+      nuevaSeñal === "buy" ? "🟢 POSIBLE COMPRA" : "🔴 POSIBLE VENTA";
+
+    tiempoEntrada.innerText = "⏱️ Intuición: entrada en 2–3 min";
     iniciarContador(3);
-  }else{
-    s.className="signal wait";
-    s.innerText="🟡 ESPERAR";
+
+    addMsg(
+      "🤖 IA: Detecto " +
+      (nuevaSeñal==="buy"?"presión alcista":"presión bajista") +
+      ". Espera confirmación.",
+      "ia"
+    );
+  }
+
+  // SIN VENTAJA
+  if(!nuevaSeñal){
+    señalTecnica = null;
+    signal.className = "signal wait";
+    signal.innerText = "🟡 SIN VENTAJA";
+    tiempoEntrada.innerText = "⏱️ Intuición: esperando contexto";
+    clearInterval(contadorInterval);
+    contador.innerText = "—";
+  }
+
+  precioAnterior = price;
+}
+
+// ================= DATOS API =================
+async function datos(){
+  try{
+    const r = await fetch(
+      `https://api.twelvedata.com/quote?symbol=${SYMBOL}&apikey=${API_KEY}`
+    );
+    const d = await r.json();
+    if(d.price && !tradeActivo){
+      analizar(parseFloat(d.price));
+    }
+  }catch(e){
+    console.log("Error API", e);
   }
 }
+setInterval(datos, 15000);
 
-// DATOS
-async function datos(){
-  const r=await fetch(`https://api.twelvedata.com/quote?symbol=${SYMBOL}&apikey=${API_KEY}`);
-  const d=await r.json();
-  if(d.price && !tradeActivo) analizar(parseFloat(d.price));
-}
-setInterval(datos,15000);
-
-// ENTRADA
+// ================= ENTRADA =================
 function entrar(){
-  tradeActivo=true;
-  estadoTrade.innerText="📌 Trade activo";
-  tiempoSalida.innerText="⏱️ Cierre recomendado: 5–10 min";
-  addMsg("🤖 IA: Trade registrado. No cierres por miedo.","ia");
+  tradeActivo = true;
+  estadoTrade.innerText = "📌 Trade activo";
+  tiempoSalida.innerText = "⏱️ Cierre estimado: 5–10 min";
+  addMsg("🤖 IA: Trade registrado. Gestiona sin miedo.","ia");
 }
 </script>
 
