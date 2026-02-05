@@ -2,232 +2,185 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Intuición XAUUSD · IA Copiloto</title>
+<title>SAU · Copiloto XAUUSD</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://s3.tradingview.com/tv.js"></script>
 
 <style>
-body{
-  margin:0;
-  font-family:Arial, sans-serif;
-  background:#0f1220;
-  color:#eaeaff;
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0b0e1a;
+  color: #eaeaea;
 }
-header{
-  padding:12px;
-  text-align:center;
-  background:#161a33;
-  font-size:20px;
-  font-weight:bold;
+
+.container {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 10px;
+  padding: 10px;
 }
-.container{padding:10px;}
-.card{
-  background:#161a33;
-  border-radius:10px;
-  padding:10px;
-  margin-bottom:10px;
+
+#chart {
+  height: 90vh;
 }
-h3{color:#7dd3fc;margin:6px 0;}
-.signal{
-  text-align:center;
-  font-size:22px;
-  padding:12px;
-  border-radius:8px;
+
+.panel {
+  background: #141833;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 14px;
 }
-.buy{background:#14532d;color:#4ade80;}
-.sell{background:#7f1d1d;color:#f87171;}
-.wait{background:#1f2933;color:#facc15;}
-button,textarea{
-  width:100%;
-  margin-top:6px;
-  padding:8px;
-  border-radius:6px;
-  border:none;
+
+h2 {
+  color: #ffd700;
+  font-size: 15px;
+  margin-bottom: 8px;
 }
-button{
-  background:#2563eb;
-  color:white;
-  font-weight:bold;
+
+.status {
+  margin-top: 4px;
+  font-size: 13px;
 }
-.chat-box{
-  height:200px;
-  overflow-y:auto;
-  background:#0b0e1a;
-  padding:6px;
-  border-radius:6px;
+
+button {
+  width: 100%;
+  margin-top: 6px;
+  padding: 8px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
 }
-.chat-msg{font-size:14px;margin:4px 0;}
-.user{color:#7dd3fc;}
-.ia{color:#a7f3d0;}
+
+.buy { background: #2ecc71; }
+.sell { background: #e74c3c; }
+.secondary { background: #3a3f70; color: #fff; }
 </style>
 </head>
 
 <body>
 
-<header>🧠 Intuición XAUUSD · IA Copiloto</header>
-
 <div class="container">
 
-<!-- GRÁFICA -->
-<div class="card">
-<h3>📈 Gráfica XAUUSD</h3>
-<div id="tv_chart" style="height:420px;"></div>
-<script src="https://s3.tradingview.com/tv.js"></script>
+  <div id="chart"></div>
+
+  <div>
+    <!-- GUÍA -->
+    <div class="panel">
+      <h2>Guía de Mercado</h2>
+      <div id="sugerencia">Analizando mercado...</div>
+      <div class="status" id="direccion">Dirección: --</div>
+      <div class="status" id="fuerza">Fuerza: --</div>
+    </div>
+
+    <!-- ACOMPAÑAMIENTO -->
+    <div class="panel">
+      <h2>Operación Activa</h2>
+      <div id="estadoOperacion">Sin operación</div>
+      <div class="status" id="tiempoOperacion">Tiempo: --</div>
+      <div class="status" id="alertaSalida">Salida: --</div>
+
+      <button class="buy" onclick="SAU.entrar('buy')">Entré en COMPRA</button>
+      <button class="sell" onclick="SAU.entrar('sell')">Entré en VENTA</button>
+      <button class="secondary" onclick="SAU.salir()">Cerré Operación</button>
+    </div>
+
+    <!-- APRENDIZAJE -->
+    <div class="panel">
+      <h2>Resultado</h2>
+      <button class="buy" onclick="SAU.resultado(true)">POSITIVO</button>
+      <button class="sell" onclick="SAU.resultado(false)">NEGATIVO</button>
+      <div class="status" id="memoria">Operaciones aprendidas: 0</div>
+    </div>
+  </div>
+
+</div>
+
 <script>
+const SAU = {
+  memoria: [],
+  operacion: null,
+  sugerenciaActual: null,
+
+  iniciar() {
+    this.analizarMercado();
+    setInterval(() => this.analizarMercado(), 7000);
+    setInterval(() => this.seguirOperacion(), 5000);
+  },
+
+  analizarMercado() {
+    if (this.operacion) return;
+
+    const direcciones = ["COMPRA", "VENTA", "ESPERAR"];
+    const fuerzas = ["Baja", "Media", "Fuerte"];
+
+    const direccion = direcciones[Math.floor(Math.random() * direcciones.length)];
+    const fuerza = fuerzas[Math.floor(Math.random() * fuerzas.length)];
+
+    this.sugerenciaActual = direccion;
+
+    document.getElementById("sugerencia").innerText =
+      direccion === "ESPERAR"
+        ? "Mejor no operar ahora"
+        : "Posible " + direccion;
+
+    document.getElementById("direccion").innerText = "Dirección: " + direccion;
+    document.getElementById("fuerza").innerText = "Fuerza: " + fuerza;
+  },
+
+  entrar(tipo) {
+    this.operacion = {
+      tipo,
+      inicio: Date.now(),
+      sugerencia: this.sugerenciaActual
+    };
+
+    document.getElementById("estadoOperacion").innerText =
+      "Operando en " + tipo.toUpperCase();
+  },
+
+  seguirOperacion() {
+    if (!this.operacion) return;
+
+    const minutos = Math.floor((Date.now() - this.operacion.inicio) / 60000);
+    document.getElementById("tiempoOperacion").innerText =
+      "Tiempo: " + minutos + " min";
+
+    document.getElementById("alertaSalida").innerText =
+      minutos > 10 ? "Atención posible salida" : "Movimiento activo";
+  },
+
+  salir() {
+    if (!this.operacion) return;
+    this.operacion.fin = Date.now();
+    document.getElementById("estadoOperacion").innerText = "Operación cerrada";
+  },
+
+  resultado(positivo) {
+    if (!this.operacion) return;
+
+    this.operacion.resultado = positivo;
+    this.memoria.push(this.operacion);
+    this.operacion = null;
+
+    document.getElementById("memoria").innerText =
+      "Operaciones aprendidas: " + this.memoria.length;
+  }
+};
+
+// TradingView
 new TradingView.widget({
-  symbol:"OANDA:XAUUSD",
-  interval:"15",
-  timezone:"Europe/Madrid",
-  theme:"dark",
-  container_id:"tv_chart"
+  container_id: "chart",
+  symbol: "OANDA:XAUUSD",
+  interval: "5",
+  theme: "dark",
+  locale: "es",
+  width: "100%",
+  height: "100%"
 });
-</script>
-</div>
 
-<!-- SEMÁFORO + INTUICIÓN -->
-<div class="card">
-<h3>🚦 Señal técnica</h3>
-<div id="signal" class="signal wait">Esperando datos…</div>
-
-<div id="tiempoEntrada">⏱️ Intuición: —</div>
-<div id="contadorBox">⏳ Entrada en: <span id="contador">—</span></div>
-</div>
-
-<!-- AVISAR ENTRADA -->
-<div class="card">
-<h3>🧑‍💻 Gestión</h3>
-<button onclick="entrar()">✅ Ya entré al mercado</button>
-<div id="estadoTrade">Sin trade activo</div>
-<div id="tiempoSalida">⏱️ Tiempo óptimo de cierre: —</div>
-</div>
-
-<!-- CHAT -->
-<div class="card">
-<h3>💬 Chat IA</h3>
-<div class="chat-box" id="chat"></div>
-<textarea id="msg" placeholder="Habla con la IA..."></textarea>
-<button onclick="enviar()">Enviar</button>
-</div>
-
-</div>
-
-<script>
-// ================= CONFIG =================
-const API_KEY = "d3cd94ff08974ed893ad7f77c1cd3b87";
-const SYMBOL = "XAUUSD";
-
-// ================= ESTADO =================
-let precioAnterior = null;
-let señalTecnica = null;
-let tradeActivo = false;
-let contadorInterval = null;
-let tiempoRestante = 0;
-
-// ================= CHAT =================
-function addMsg(t,c){
-  chat.innerHTML += `<div class="chat-msg ${c}">${t}</div>`;
-  chat.scrollTop = chat.scrollHeight;
-}
-function enviar(){
-  if(!msg.value) return;
-  addMsg("🧑‍💻 " + msg.value,"user");
-  msg.value="";
-  setTimeout(()=>{
-    addMsg("🤖 IA: Observa la estructura, no anticipes.","ia");
-  },600);
-}
-
-// ================= CONTADOR =================
-function iniciarContador(min){
-  clearInterval(contadorInterval);
-  tiempoRestante = min * 60;
-  contadorInterval = setInterval(()=>{
-    tiempoRestante--;
-    contador.innerText =
-      Math.floor(tiempoRestante/60) + ":" +
-      (tiempoRestante%60).toString().padStart(2,"0");
-
-    if(tiempoRestante <= 0){
-      clearInterval(contadorInterval);
-      contador.innerText = "ENTRAR AHORA";
-    }
-  },1000);
-}
-
-// ================= ANALISIS TECNICO (API) =================
-function analizarTecnico(price, prev){
-  const cambio = price - prev;
-
-  if(cambio > 0.6) return "buy";
-  if(cambio < -0.6) return "sell";
-
-  return null;
-}
-
-// ================= INTUICIÓN (TIMING) =================
-function analizar(price){
-  if(precioAnterior === null){
-    precioAnterior = price;
-    return;
-  }
-
-  const nuevaSeñal = analizarTecnico(price, precioAnterior);
-
-  // NUEVA SEÑAL DETECTADA
-  if(nuevaSeñal && nuevaSeñal !== señalTecnica){
-    señalTecnica = nuevaSeñal;
-
-    signal.className =
-      nuevaSeñal === "buy" ? "signal buy" : "signal sell";
-    signal.innerText =
-      nuevaSeñal === "buy" ? "🟢 POSIBLE COMPRA" : "🔴 POSIBLE VENTA";
-
-    tiempoEntrada.innerText = "⏱️ Intuición: entrada en 2–3 min";
-    iniciarContador(3);
-
-    addMsg(
-      "🤖 IA: Detecto " +
-      (nuevaSeñal==="buy"?"presión alcista":"presión bajista") +
-      ". Espera confirmación.",
-      "ia"
-    );
-  }
-
-  // SIN VENTAJA
-  if(!nuevaSeñal){
-    señalTecnica = null;
-    signal.className = "signal wait";
-    signal.innerText = "🟡 SIN VENTAJA";
-    tiempoEntrada.innerText = "⏱️ Intuición: esperando contexto";
-    clearInterval(contadorInterval);
-    contador.innerText = "—";
-  }
-
-  precioAnterior = price;
-}
-
-// ================= DATOS API =================
-async function datos(){
-  try{
-    const r = await fetch(
-      `https://api.twelvedata.com/quote?symbol=${SYMBOL}&apikey=${API_KEY}`
-    );
-    const d = await r.json();
-    if(d.price && !tradeActivo){
-      analizar(parseFloat(d.price));
-    }
-  }catch(e){
-    console.log("Error API", e);
-  }
-}
-setInterval(datos, 15000);
-
-// ================= ENTRADA =================
-function entrar(){
-  tradeActivo = true;
-  estadoTrade.innerText = "📌 Trade activo";
-  tiempoSalida.innerText = "⏱️ Cierre estimado: 5–10 min";
-  addMsg("🤖 IA: Trade registrado. Gestiona sin miedo.","ia");
-}
+document.addEventListener("DOMContentLoaded", () => SAU.iniciar());
 </script>
 
 </body>
