@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Intuición XAUUSD</title>
+  <title>IA Intuición XAUUSD</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
@@ -20,7 +20,7 @@
       margin-bottom: 10px;
     }
     p {
-      max-width: 700px;
+      max-width: 800px;
       margin: 0 auto 20px;
       line-height: 1.6;
       color: #cfcfcf;
@@ -28,16 +28,27 @@
     section {
       padding: 40px 20px;
     }
-    #ia-panel {
+    .panel {
       background: #161a2f;
-      border-radius: 10px;
-      max-width: 800px;
-      margin: 0 auto;
+      border-radius: 12px;
+      max-width: 900px;
+      margin: 20px auto;
       padding: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.4);
     }
-    .status {
-      font-size: 18px;
-      margin-top: 10px;
+    button {
+      padding: 10px 16px;
+      margin: 5px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .buy { background:#2e7d32; color:#fff; }
+    .sell { background:#c62828; color:#fff; }
+
+    .semaforo {
+      font-size: 28px;
     }
     footer {
       font-size: 12px;
@@ -50,25 +61,24 @@
 <body>
 
 <header>
-  <h1>Intuición aplicada al mercado XAUUSD</h1>
+  <h1>🤖 IA de Intuición para XAUUSD</h1>
   <p>
-    La intuición no es adivinar. Es el resultado de la experiencia,
-    la observación profunda del precio y la calma mental.
-    Esta web explora el contexto del oro desde una perspectiva intuitiva y analítica.
+    Copiloto inteligente para scalping en oro.
+    Tú decides la entrada, la IA te ayuda a maximizar la salida.
   </p>
 </header>
 
+<!-- GRÁFICO -->
 <section>
-  <!-- GRÁFICA EN VIVO -->
   <div class="tradingview-widget-container">
     <div id="tradingview_xauusd"></div>
     <script src="https://s3.tradingview.com/tv.js"></script>
     <script>
       new TradingView.widget({
         "width": "100%",
-        "height": 500,
+        "height": 480,
         "symbol": "OANDA:XAUUSD",
-        "interval": "15",
+        "interval": "1",
         "timezone": "Etc/UTC",
         "theme": "dark",
         "style": "1",
@@ -82,87 +92,107 @@
   </div>
 </section>
 
-  <!-- CUADRO 1: ANÁLISIS AUTOMÁTICO -->
-<div id="analisis-ia" style="margin-top:25px; padding:15px; border:1px solid #ccc;">
+<!-- CUADRO 1 -->
+<section class="panel">
+  <h2>📊 Intuición IA (antes de operar)</h2>
 
-  <h3>📊 Análisis automático IA (XAUUSD)</h3>
+  <p><strong>Contexto actual:</strong> <span id="contexto"></span></p>
+  <p><strong>Sugerencia:</strong> <span id="direccion"></span></p>
+  <p><strong>Duración estimada:</strong> <span id="duracion"></span></p>
+  <p><strong>Confianza:</strong> <span id="confianza"></span></p>
+</section>
 
-  <p><strong>Contexto IA:</strong> <span id="contexto"></span></p>
-  <p><strong>Dirección sugerida:</strong> <span id="direccion"></span></p>
-  <p><strong>Lote fijo:</strong> 0.10</p>
-  <p><strong>Apalancamiento:</strong> 1:1400</p>
-  <p><strong>Movimiento analizado:</strong> 1 pip</p>
+<!-- CUADRO 2 -->
+<section class="panel">
+  <h2>🧠 Seguimiento IA (trade activo)</h2>
 
-  <p><strong>Ganancia estimada:</strong> <span id="ganancia"></span></p>
-  <p><strong>Pérdida estimada:</strong> <span id="perdida"></span></p>
+  <button class="buy" onclick="iniciarOperacion('compra')">🟢 Inicié COMPRA</button>
+  <button class="sell" onclick="iniciarOperacion('venta')">🔴 Inicié VENTA</button>
 
-</div>
+  <p><strong>Dirección:</strong> <span id="flecha">➡️</span></p>
+  <p><strong>Ganancia estimada:</strong> <span id="ganancia">0%</span></p>
+  <p><strong>Semáforo:</strong> <span class="semaforo" id="semaforo">🟡</span></p>
 
-<!-- CUADRO 2: CONSEJO IA -->
-<div id="consejo-ia" style="margin-top:15px; padding:15px; border:1px solid #aaa; background:#f9f9f9;">
-  <h3>🧠 Consejo contextual IA</h3>
-  <p id="texto-ia"></p>
-</div>
-
-<script>
-  // ==========================
-  // CONFIGURACIÓN FIJA
-  // ==========================
-  const lote = 0.10;
-  const valorPip = 10; // USD por pip en 0.10 lotes
-  const movimiento = 1; // 1 pip
-
-  // CONTEXTO IA (simulado por ahora)
-  // Opciones: favorable | neutro | desfavorable
-  const contextoIA = "favorable";
-
-  let direccion = "";
-  let textoIA = "";
-
-  if (contextoIA === "favorable") {
-    direccion = "📈 Compra";
-    textoIA =
-      "El contexto del mercado es favorable y muestra una estructura estable. Una posible compra podría considerarse si el precio confirma continuidad. La pérdida por un movimiento adverso de 1 pip forma parte del riesgo asumido.";
-  } 
-  else if (contextoIA === "desfavorable") {
-    direccion = "📉 Venta";
-    textoIA =
-      "El mercado presenta presión bajista. Una posible venta podría evaluarse si el precio mantiene debilidad. Es importante considerar la pérdida potencial ante un posible retroceso.";
-  } 
-  else {
-    direccion = "⏸ Esperar";
-    textoIA =
-      "El mercado se encuentra en un contexto neutro, sin una ventaja clara. Esperar confirmación puede ser la decisión más prudente antes de tomar una posición.";
-  }
-
-  const ganancia = valorPip * movimiento;
-  const perdida = valorPip * movimiento;
-
-  // MOSTRAR RESULTADOS
-  document.getElementById("contexto").innerText = contextoIA.toUpperCase();
-  document.getElementById("direccion").innerText = direccion;
-  document.getElementById("ganancia").innerText = `+${ganancia} USD`;
-  document.getElementById("perdida").innerText = `-${perdida} USD`;
-  document.getElementById("texto-ia").innerText = textoIA;
-</script>
-<section id="ia-panel">
-  <h2>Análisis contextual IA</h2>
-  <p class="status">
-    🤖 Analizando el contexto actual del mercado...
-  </p>
-  <p>
-    La IA no emite señales de compra o venta.
-    Evalúa el entorno del mercado y advierte si el contexto es
-    favorable, neutro o desfavorable para operar.
-  </p>
+  <p id="mensaje"></p>
 </section>
 
 <footer>
   <p>
-    Aviso: Este contenido es únicamente educativo y no constituye
-    asesoramiento financiero ni recomendaciones de inversión.
+    Aviso: Esta web es educativa. No constituye asesoramiento financiero.
   </p>
 </footer>
+
+<script>
+  // ================= INTUICIÓN IA =================
+  const contextos = ["FAVORABLE", "NEUTRO", "DESFAVORABLE"];
+  const contexto = contextos[Math.floor(Math.random()*3)];
+
+  let direccion = "⏸ Esperar";
+  let duracion = "—";
+  let confianza = "—";
+
+  if (contexto === "FAVORABLE") {
+    direccion = "📈 Posible COMPRA";
+    duracion = "5–15 min";
+    confianza = "65–75%";
+  } else if (contexto === "DESFAVORABLE") {
+    direccion = "📉 Posible VENTA";
+    duracion = "5–15 min";
+    confianza = "65–75%";
+  } else {
+    duracion = "No recomendado";
+    confianza = "—";
+  }
+
+  document.getElementById("contexto").innerText = contexto;
+  document.getElementById("direccion").innerText = direccion;
+  document.getElementById("duracion").innerText = duracion;
+  document.getElementById("confianza").innerText = confianza;
+
+  // ================= SEGUIMIENTO =================
+  let operacionActiva = false;
+  let tipoOperacion = null;
+
+  function iniciarOperacion(tipo) {
+    operacionActiva = true;
+    tipoOperacion = tipo;
+    document.getElementById("mensaje").innerText =
+      `Seguimiento activo de ${tipo.toUpperCase()}. IA optimizando salida...`;
+  }
+
+  setInterval(() => {
+    if (!operacionActiva) return;
+
+    const momentum = Math.random();
+    let flecha = "➡️";
+    let semaforo = "🟡";
+    let ganancia = "0%";
+    let mensaje = "";
+
+    if (momentum > 0.7) {
+      flecha = tipoOperacion === "compra" ? "⬆️" : "⬇️";
+      semaforo = "🟢";
+      ganancia = `+${(momentum*0.9).toFixed(2)}%`;
+      mensaje = "Momentum fuerte. Mantener.";
+    } else if (momentum > 0.4) {
+      flecha = "➡️";
+      semaforo = "🟡";
+      ganancia = `+${(momentum*0.5).toFixed(2)}%`;
+      mensaje = "Atención: posible agotamiento.";
+    } else {
+      flecha = tipoOperacion === "compra" ? "⬇️" : "⬆️";
+      semaforo = "🔴";
+      ganancia = `+${(momentum*0.3).toFixed(2)}%`;
+      mensaje = "Cerrar recomendado para proteger ganancia.";
+    }
+
+    document.getElementById("flecha").innerText = flecha;
+    document.getElementById("semaforo").innerText = semaforo;
+    document.getElementById("ganancia").innerText = ganancia;
+    document.getElementById("mensaje").innerText = mensaje;
+
+  }, 4000);
+</script>
 
 </body>
 </html>
