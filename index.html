@@ -2,250 +2,195 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<title>Intuición XAUUSD · Copiloto IA</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Intuición XAUUSD</title>
 
-<!-- TradingView -->
 <script src="https://s3.tradingview.com/tv.js"></script>
 
 <style>
 body{
   margin:0;
   font-family:Arial, sans-serif;
-  background:#0b1020;
-  color:#fff;
+  background:#0f1220;
+  color:#eaeaf0;
+}
+h3{ margin:6px 0; }
+
+.panel{
+  background:#171a2e;
+  border-radius:10px;
+  padding:12px;
+  margin:8px;
 }
 
-.container{
-  max-width:430px;
-  margin:auto;
+button{
   padding:10px;
-}
-
-/* ===== GRAFICA ===== */
-#chart{
-  height:260px;
-  border-radius:14px;
-  overflow:hidden;
-  margin-bottom:12px;
-}
-
-/* ===== TARJETAS ===== */
-.card{
-  background:linear-gradient(180deg,#121a33,#0b1020);
-  border-radius:16px;
-  padding:16px;
-  margin-bottom:16px;
-  box-shadow:0 10px 25px rgba(0,0,0,.45);
-}
-
-.title{
-  text-align:center;
-  font-size:20px;
-  font-weight:bold;
-  margin-bottom:12px;
-  color:#2de2ff;
-}
-
-/* ===== BOTONES ===== */
-.btn{
-  width:100%;
+  margin:5px;
   border:none;
-  border-radius:12px;
-  padding:14px;
-  font-size:18px;
+  border-radius:6px;
   font-weight:bold;
-  margin-bottom:10px;
   cursor:pointer;
 }
+.buy{ background:#0f5132; color:#9effc2; }
+.sell{ background:#842029; color:#ffb3b3; }
+.win{ background:#146c43; color:#caffdf; }
+.loss{ background:#842029; color:#ffb3b3; }
 
-.buy{ background:#00c853; color:#000; }
-.sell{ background:#ff5252; color:#000; }
-.close{ background:#ffd600; color:#000; }
-
-.good{ background:#00e676; color:#000; }
-.bad{ background:#ff1744; color:#fff; }
-
-/* ===== ESTADO ===== */
-.status{
-  margin-top:10px;
-  font-size:14px;
-  opacity:.85;
-}
-
-/* ===== DOTS ===== */
-.dot-bar{
-  display:flex;
-  justify-content:center;
-  gap:10px;
-  margin:12px 0;
-}
-.dot{
-  width:14px;
-  height:14px;
-  border-radius:50%;
-  background:#444;
-}
-
-/* ===== IA ===== */
-.ia-line{
-  margin:8px 0;
-  font-size:16px;
-}
-.highlight{
-  color:#2de2ff;
+#semaforo{
+  padding:15px;
+  font-size:18px;
   font-weight:bold;
-}
-
-/* ===== COMPARATIVA ===== */
-.ia-compare{
-  display:flex;
-  gap:10px;
-  margin-top:12px;
-}
-
-.side{
-  flex:1;
-  padding:10px;
-  border-radius:12px;
-  font-size:14px;
-}
-
-.bull{
-  background:rgba(0,255,150,.12);
-  border:1px solid rgba(0,255,150,.35);
-}
-
-.bear{
-  background:rgba(255,60,60,.12);
-  border:1px solid rgba(255,60,60,.35);
-}
-
-.side-title{
-  font-weight:bold;
-  margin-bottom:6px;
   text-align:center;
+  border-radius:8px;
 }
+.verde{ background:#0f5132; color:#9effc2; }
+.amarillo{ background:#664d03; color:#ffe69c; }
+.rojo{ background:#842029; color:#ffb3b3; }
 </style>
 </head>
 
 <body>
-<div class="container">
 
-  <!-- GRAFICA -->
-  <div id="chart"></div>
+<div id="tv_chart" style="height:420px;"></div>
 
-  <!-- CONTROL -->
-  <div class="card">
-    <div class="title">🧠 Control de Operación</div>
+<div class="panel">
+  <h3>🎯 Entrada manual</h3>
+  <button class="buy" onclick="entrarOperacion('BUY')">🟢 Entré en COMPRA</button>
+  <button class="sell" onclick="entrarOperacion('SELL')">🔴 Entré en VENTA</button>
+</div>
 
-    <button class="btn buy" onclick="entrar('COMPRA')">Entré en COMPRA</button>
-    <button class="btn sell" onclick="entrar('VENTA')">Entré en VENTA</button>
-    <button class="btn close" onclick="cerrar()">Cerré Operación</button>
+<div class="panel">
+  <h3>🚦 Semáforo de la operación</h3>
+  <div id="semaforo">⏳ Esperando entrada</div>
+</div>
 
-    <div class="dot-bar">
-      <div class="dot"></div>
-      <div class="dot"></div>
-      <div class="dot"></div>
-    </div>
+<div class="panel">
+  <h3>📊 Estado actual</h3>
+  <div id="estadoOperacion">Sin operación activa</div>
+</div>
 
-    <button class="btn good" onclick="resultado('POSITIVO')">Resultado POSITIVO</button>
-    <button class="btn bad" onclick="resultado('NEGATIVO')">Resultado NEGATIVO</button>
+<div class="panel">
+  <h3>✍️ Cierre manual</h3>
+  <button class="win" onclick="cerrarOperacion('win')">🟢 Fue GANADORA</button>
+  <button class="loss" onclick="cerrarOperacion('loss')">🔴 Fue PERDEDORA</button>
+</div>
 
-    <div class="status" id="estado">Estado: esperando entrada...</div>
-  </div>
-
-  <!-- INTUICION IA -->
-  <div class="card">
-    <div class="title">📊 Intuición IA</div>
-
-    <div class="ia-line">Dirección: <span class="highlight" id="dir">ALCISTA 📈</span></div>
-    <div class="ia-line">Fuerza: <span class="highlight" id="fuerza">77%</span></div>
-    <div class="ia-line">Tiempo estimado: <span class="highlight" id="tiempo">8 min</span></div>
-    <div class="ia-line">Sugerencia: <span class="highlight" id="sug">Mantener COMPRA</span></div>
-
-    <hr style="opacity:.2;margin:14px 0">
-
-    <!-- COMPARATIVA -->
-    <div class="ia-compare">
-      <div class="side bull">
-        <div class="side-title">ALCISTA 📈</div>
-        <div>Probabilidad: <b id="bullProb">72%</b></div>
-        <div>Duración: <b id="bullTime">9 min</b></div>
-        <div>Fuerza: <b id="bullPower">Fuerte</b></div>
-      </div>
-
-      <div class="side bear">
-        <div class="side-title">BAJISTA 📉</div>
-        <div>Probabilidad: <b id="bearProb">28%</b></div>
-        <div>Duración: <b id="bearTime">4 min</b></div>
-        <div>Fuerza: <b id="bearPower">Débil</b></div>
-      </div>
-    </div>
-  </div>
-
+<div class="panel">
+  <h3>📈 Rendimiento</h3>
+  <div id="estadisticas">Sin datos</div>
+  <div id="probabilidad">Esperando historial</div>
 </div>
 
 <script>
-/* ===== TRADINGVIEW ===== */
+/* ================== TRADINGVIEW ================== */
+let tvPrecioActual = null;
+
 new TradingView.widget({
-  autosize:true,
-  symbol:"OANDA:XAUUSD",
-  interval:"5",
-  timezone:"Etc/UTC",
-  theme:"dark",
-  style:"1",
-  locale:"es",
-  container_id:"chart"
+  symbol: "XAUUSD",
+  interval: "5",
+  container_id: "tv_chart",
+  theme: "dark",
+  style: "1",
+  locale: "es",
+  toolbar_bg: "#0f1220",
+  hide_top_toolbar: false,
+  withdateranges: true,
+  allow_symbol_change: false,
+  save_image: false,
 });
 
-/* ===== CONTROL ===== */
-let operacion=null;
+/* ================== ESTADO ================== */
+let operacionActiva = false;
+let tipoOperacion = null;
+let precioEntrada = null;
 
-function entrar(tipo){
-  operacion=tipo;
-  document.getElementById("estado").innerText =
-    "Estado: operación abierta en "+tipo;
-}
+let historial = JSON.parse(localStorage.getItem("historialXAU")) || [];
 
-function cerrar(){
-  if(!operacion){
-    alert("No hay operación activa");
-    return;
+/* ================== PRECIO SIMULADO ==================
+TradingView no expone el precio directo por JS.
+Esto se usa solo para lógica relativa (acompañamiento).
+*/
+function obtenerPrecioActual(){
+  if(!tvPrecioActual){
+    tvPrecioActual = 2300 + Math.random(); // base inicial
   }
-  document.getElementById("estado").innerText =
-    "Estado: operación cerrada ("+operacion+")";
-  operacion=null;
+  tvPrecioActual += (Math.random() - 0.5) * 0.3;
+  return tvPrecioActual;
 }
 
-function resultado(res){
-  document.getElementById("estado").innerText =
-    "Resultado: "+res;
+/* ================== ENTRADA ================== */
+function entrarOperacion(tipo){
+  const precio = obtenerPrecioActual();
+  operacionActiva = true;
+  tipoOperacion = tipo;
+  precioEntrada = precio;
+
+  actualizarSemaforo("verde","🟢 Operación activa · Mantener");
 }
 
-/* ===== INTUICION IA (SIMULADA, LISTA PARA API) ===== */
-setInterval(()=>{
-  const bull=Math.floor(55+Math.random()*30);
-  const bear=100-bull;
+/* ================== SEMÁFORO ================== */
+function analizarOperacion(){
+  if(!operacionActiva) return;
 
-  document.getElementById("bullProb").innerText=bull+"%";
-  document.getElementById("bearProb").innerText=bear+"%";
+  const precio = obtenerPrecioActual();
+  let diff = precio - precioEntrada;
+  if(tipoOperacion === "SELL") diff *= -1;
 
-  document.getElementById("bullTime").innerText=
-    Math.floor(6+Math.random()*6)+" min";
-  document.getElementById("bearTime").innerText=
-    Math.floor(3+Math.random()*5)+" min";
+  document.getElementById("estadoOperacion").innerText =
+    `Diferencia: ${diff.toFixed(2)}`;
 
-  document.getElementById("fuerza").innerText=bull+"%";
-
-  if(bull>bear){
-    document.getElementById("dir").innerText="ALCISTA 📈";
-    document.getElementById("sug").innerText="Mantener COMPRA";
+  if(diff > 0.4){
+    actualizarSemaforo("verde","🟢 Mantener operación");
+  }else if(diff > -0.2){
+    actualizarSemaforo("amarillo","🟡 Posible cierre");
   }else{
-    document.getElementById("dir").innerText="BAJISTA 📉";
-    document.getElementById("sug").innerText="Mantener VENTA";
+    actualizarSemaforo("rojo","🔴 Riesgo alto");
   }
-},6000);
+}
+
+function actualizarSemaforo(color,texto){
+  const s = document.getElementById("semaforo");
+  s.className = color;
+  s.innerText = texto;
+}
+
+/* ================== CIERRE MANUAL ================== */
+function cerrarOperacion(resultado){
+  if(!operacionActiva) return;
+
+  historial.push({ resultado });
+  if(historial.length > 20) historial.shift();
+  localStorage.setItem("historialXAU", JSON.stringify(historial));
+
+  operacionActiva = false;
+  precioEntrada = null;
+  tipoOperacion = null;
+
+  document.getElementById("semaforo").className = "";
+  document.getElementById("semaforo").innerText = "⏳ Esperando nueva entrada";
+
+  actualizarEstadisticas();
+}
+
+/* ================== ESTADÍSTICAS ================== */
+function actualizarEstadisticas(){
+  const total = historial.length;
+  const wins = historial.filter(h=>h.resultado==="win").length;
+  const prob = total ? Math.round((wins/total)*100) : 0;
+
+  document.getElementById("estadisticas").innerText =
+    `Aciertos: ${wins}/${total} (${prob}%)`;
+
+  document.getElementById("probabilidad").innerText =
+    prob >= 60
+      ? `🟢 Próxima entrada favorable (${prob}%)`
+      : prob >= 45
+        ? `🟡 Probabilidad media (${prob}%)`
+        : `🔴 Probabilidad baja (${prob}%)`;
+}
+
+actualizarEstadisticas();
+setInterval(analizarOperacion, 5000);
 </script>
 
 </body>
