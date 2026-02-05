@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>SAU · Copiloto XAUUSD</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <script src="https://s3.tradingview.com/tv.js"></script>
 
 <style>
@@ -14,15 +15,22 @@ body {
   color: #eaeaea;
 }
 
-.container {
-  display: grid;
-  grid-template-columns: 1fr 340px;
-  gap: 10px;
-  padding: 10px;
+h2 {
+  font-size: 15px;
+  color: #ffd700;
+  margin-bottom: 6px;
 }
 
 #chart {
-  height: 90vh;
+  width: 100%;
+  height: 70vh;
+}
+
+.panels {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 10px;
+  padding: 10px;
 }
 
 .panel {
@@ -32,25 +40,19 @@ body {
   font-size: 14px;
 }
 
-h2 {
-  color: #ffd700;
-  font-size: 15px;
-  margin-bottom: 8px;
-}
-
 .status {
-  margin-top: 4px;
   font-size: 13px;
+  margin-top: 4px;
 }
 
 button {
   width: 100%;
-  margin-top: 6px;
   padding: 8px;
+  margin-top: 6px;
   border: none;
   border-radius: 6px;
-  cursor: pointer;
   font-weight: bold;
+  cursor: pointer;
 }
 
 .buy { background: #2ecc71; }
@@ -61,38 +63,44 @@ button {
 
 <body>
 
-<div class="container">
+<!-- GRÁFICA -->
+<div id="chart"></div>
 
-  <div id="chart"></div>
+<!-- PANELES -->
+<div class="panels">
 
-  <div>
-    <!-- GUÍA -->
-    <div class="panel">
-      <h2>Guía de Mercado</h2>
-      <div id="sugerencia">Analizando mercado...</div>
-      <div class="status" id="direccion">Dirección: --</div>
-      <div class="status" id="fuerza">Fuerza: --</div>
-    </div>
+  <!-- ESTADO DEL MERCADO -->
+  <div class="panel">
+    <h2>Estado del Mercado</h2>
+    <div id="direccion">Dirección: --</div>
+    <div id="fuerza">Fuerza: --</div>
+    <div id="duracion">Duración estimada: --</div>
+  </div>
 
-    <!-- ACOMPAÑAMIENTO -->
-    <div class="panel">
-      <h2>Operación Activa</h2>
-      <div id="estadoOperacion">Sin operación</div>
-      <div class="status" id="tiempoOperacion">Tiempo: --</div>
-      <div class="status" id="alertaSalida">Salida: --</div>
+  <!-- GUÍA -->
+  <div class="panel">
+    <h2>Guía de Mercado</h2>
+    <div id="sugerencia">Analizando gráfico...</div>
+  </div>
 
-      <button class="buy" onclick="SAU.entrar('buy')">Entré en COMPRA</button>
-      <button class="sell" onclick="SAU.entrar('sell')">Entré en VENTA</button>
-      <button class="secondary" onclick="SAU.salir()">Cerré Operación</button>
-    </div>
+  <!-- OPERACIÓN -->
+  <div class="panel">
+    <h2>Operación Activa</h2>
+    <div id="estadoOperacion">Sin operación</div>
+    <div class="status" id="tiempoOperacion">Tiempo: --</div>
+    <div class="status" id="alertaSalida">Salida: --</div>
 
-    <!-- APRENDIZAJE -->
-    <div class="panel">
-      <h2>Resultado</h2>
-      <button class="buy" onclick="SAU.resultado(true)">POSITIVO</button>
-      <button class="sell" onclick="SAU.resultado(false)">NEGATIVO</button>
-      <div class="status" id="memoria">Operaciones aprendidas: 0</div>
-    </div>
+    <button class="buy" onclick="SAU.entrar('buy')">Entré en COMPRA</button>
+    <button class="sell" onclick="SAU.entrar('sell')">Entré en VENTA</button>
+    <button class="secondary" onclick="SAU.salir()">Cerré Operación</button>
+  </div>
+
+  <!-- APRENDIZAJE -->
+  <div class="panel">
+    <h2>Resultado / Aprendizaje</h2>
+    <button class="buy" onclick="SAU.resultado(true)">Resultado POSITIVO</button>
+    <button class="sell" onclick="SAU.resultado(false)">Resultado NEGATIVO</button>
+    <div class="status" id="memoria">Operaciones aprendidas: 0</div>
   </div>
 
 </div>
@@ -101,11 +109,11 @@ button {
 const SAU = {
   memoria: [],
   operacion: null,
-  sugerenciaActual: null,
+  sugerencia: "--",
 
   iniciar() {
     this.analizarMercado();
-    setInterval(() => this.analizarMercado(), 7000);
+    setInterval(() => this.analizarMercado(), 8000);
     setInterval(() => this.seguirOperacion(), 5000);
   },
 
@@ -118,24 +126,25 @@ const SAU = {
     const direccion = direcciones[Math.floor(Math.random() * direcciones.length)];
     const fuerza = fuerzas[Math.floor(Math.random() * fuerzas.length)];
 
-    this.sugerenciaActual = direccion;
+    this.sugerencia = direccion;
+
+    document.getElementById("direccion").innerText = "Dirección: " + direccion;
+    document.getElementById("fuerza").innerText = "Fuerza: " + fuerza;
+    document.getElementById("duracion").innerText =
+      "Duración estimada: " + (fuerza === "Fuerte" ? "Extendida" : "Corta");
 
     document.getElementById("sugerencia").innerText =
       direccion === "ESPERAR"
         ? "Mejor no operar ahora"
         : "Posible " + direccion;
-
-    document.getElementById("direccion").innerText = "Dirección: " + direccion;
-    document.getElementById("fuerza").innerText = "Fuerza: " + fuerza;
   },
 
   entrar(tipo) {
     this.operacion = {
       tipo,
       inicio: Date.now(),
-      sugerencia: this.sugerenciaActual
+      sugerencia: this.sugerencia
     };
-
     document.getElementById("estadoOperacion").innerText =
       "Operando en " + tipo.toUpperCase();
   },
@@ -148,7 +157,7 @@ const SAU = {
       "Tiempo: " + minutos + " min";
 
     document.getElementById("alertaSalida").innerText =
-      minutos > 10 ? "Atención posible salida" : "Movimiento activo";
+      minutos >= 10 ? "Atención posible salida" : "Movimiento activo";
   },
 
   salir() {
